@@ -24,6 +24,7 @@
      school: '某某小学', className: '一年级1班', edition: '班级版',      // 显示在页面顶部和底部
      note: '家长自制，仅供班级练习使用',                                  // 页面底部的小字
      defaultPreset: '10以内的加减混合',                                  // 第一次打开时的题型（题型列表里的名字）
+     defaultQuery: 'n=0-10_0-10&o=as&r=0-10&per=40&cols=4',              // 或者用作业链接的写法给一整套默认设置
      defaultTab: 'auto',                                                // auto：手机平板进口算训练，电脑进出题打印
      sheetInfo: '一年级1班　姓名：________　时间：________　得分：________', // 卷子标题下面那一行
      shareText: '班级口算练习'                                            // 系统分享时附带的文字
@@ -458,6 +459,12 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
 .wxguide p b { font-size: 24px; letter-spacing: 3px; }
 .wxguide .btn { margin-top: 14px; background: transparent; color: var(--on-scrim); border-color: var(--on-scrim); }
 .foot { text-align: center; font-size: 12.5px; color: var(--ink-3); padding-top: 4px; }
+.linkbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--active); }
+.linkbar b { color: var(--board); }
+.share-sum { list-style: none; margin: 0; padding: 10px 12px; display: grid; gap: 6px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
+.share-sum li { display: grid; grid-template-columns: 5.5em 1fr; gap: 8px; font-size: 14px; }
+.share-sum b { color: var(--ink-2); font-weight: 600; }
+.txt.mono { font: 13px/1.4 var(--font-num); color: var(--ink-2); }
 .dialog {
   width: min(680px, 100%); max-height: 100%; overflow: auto;
   background: var(--surface); color: var(--ink); border-radius: 16px; box-shadow: var(--shadow);
@@ -537,6 +544,11 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
       <span><span class="long">使用</span>说明</span>
     </button>
   </header>
+
+  <div class="msg linkbar" id="link-banner" role="status" hidden>
+    <span id="link-banner-text"></span>
+    <button class="btn quiet" type="button" id="link-banner-close">知道了</button>
+  </div>
 
   <!-- ============ 出题打印 ============ -->
   <section id="view-sheet" class="sheet-view" role="tabpanel" aria-labelledby="tab-sheet">
@@ -726,7 +738,7 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
         <div class="field">
           <span class="label">题数</span>
           <div class="seg" id="p-count" role="group" aria-label="题数">
-            <button type="button" data-v="10">10</button><button type="button" data-v="20">20</button><button type="button" data-v="30">30</button><button type="button" data-v="50">50</button>
+            <button type="button" data-v="10">10</button><button type="button" data-v="20">20</button><button type="button" data-v="30">30</button><button type="button" data-v="40">40</button><button type="button" data-v="50">50</button>
           </div>
         </div>
       </div>
@@ -799,7 +811,7 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
     </ul>
     <h3>其他</h3>
     <ul>
-      <li>点右上角「分享」可以把网址发给其他家长；在微信里会提示从右上角「···」发送给朋友。</li>
+      <li>布置作业：先设好题型、题数和限时，点右上角「分享」，复制链接发到家长群。家长点开就是同一套设置，还可以填个作业名称印在卷子上。</li>
       <li>设置和练习记录只保存在这台设备的浏览器里。</li>
       <li>微信里不能直接打印：用「存为图片」，或点右上角「···」选「在浏览器打开」后再打印。</li>
       <li>为了保护眼睛，不要长时间在屏幕上做题。</li>
@@ -816,6 +828,29 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
     </div>
     <p id="copy-msg">没能自动复制。文字已经选中，请按 Ctrl+C（苹果电脑按 ⌘+C）复制。</p>
     <textarea id="copy-text" readonly></textarea>
+  </div>
+</div>
+
+<div class="overlay" id="sharebox" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="sharebox-title">
+    <div class="head">
+      <h2 id="sharebox-title">分享 · 布置作业</h2>
+      <button class="btn quiet" type="button" data-close>关闭</button>
+    </div>
+    <p>把链接发到家长群，大家点开就是同样的题型和设置，不用再一步步教怎么设置。</p>
+    <ul class="share-sum" id="share-sum"></ul>
+    <div class="field">
+      <label class="label" for="share-name">作业名称（可选，会印在卷子标题上）</label>
+      <input class="txt" id="share-name" type="text" maxlength="40" placeholder="例如：11月3日口算作业">
+    </div>
+    <label class="check"><input type="checkbox" id="share-with" checked> 链接里带上现在的题型和设置</label>
+    <input class="txt mono" id="share-url" type="text" readonly aria-label="要分享的链接">
+    <div class="row">
+      <button class="btn primary" type="button" id="share-copy">复制链接</button>
+      <button class="btn" type="button" id="share-wx" hidden>从微信右上角发送</button>
+      <button class="btn" type="button" id="share-sys" hidden>用其他应用分享</button>
+    </div>
+    <p class="hint">想换题型、题数或限时，先在页面里改好，再点「分享」。</p>
   </div>
 </div>
 
@@ -993,6 +1028,7 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
     for (var j = 0; j < 3; j++) {
       var arr = (c.ops && c.ops[j]) || [];
       out.ops[j] = OP_ORDER.filter(function (o) { return arr.indexOf(o) >= 0; });
+      if (!out.ops[j].length && j >= out.count - 1) out.ops[j] = ['+'];   // 暂时用不到的位置先给个默认符号
     }
     out.res = ns(c.res, base.res);
     out.carry = ['any', 'yes', 'no'].indexOf(c.carry) >= 0 ? c.carry : 'any';
@@ -1288,6 +1324,7 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
   var CFG = window.KOUSUAN_CONFIG || {};
   var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
   var STORE = 'kousuan.settings.v1', HIST = 'kousuan.history.v1';
+  var COUNTS = [10, 20, 30, 40, 50];
   var DEFAULT_PRESET = CFG.defaultPreset && E.hasPreset(CFG.defaultPreset) ? CFG.defaultPreset : '20以内的进位加法';
   var DEFAULT_INFO = typeof CFG.sheetInfo === 'string' ? CFG.sheetInfo : '姓名：__________　　时间：__________　　得分：__________';
 
@@ -1332,7 +1369,7 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
     };
     d.practice = {
       mode: ['score', 'timer', 'limit'].indexOf(pr.mode) >= 0 ? pr.mode : 'score',
-      limit: clampInt(pr.limit, 5, 9999, 60), count: [10, 20, 30, 50].indexOf(pr.count) >= 0 ? pr.count : 30,
+      limit: clampInt(pr.limit, 5, 9999, 60), count: COUNTS.indexOf(pr.count) >= 0 ? pr.count : 30,
       keypad: typeof pr.keypad === 'boolean' ? pr.keypad : null
     };
     d.tab = s.tab === 'practice' ? 'practice' : 'sheet';
@@ -1744,15 +1781,139 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
     window.print();
   });
 
-  /* ---- 分享：微信里提示右上角菜单；其他手机浏览器用系统分享；电脑上复制链接 ---- */
-  $('#btn-share').addEventListener('click', function () {
-    var url = location.href.split('#')[0];
-    if (isWeChat) { $('#wxshare').hidden = false; return; }
-    if (navigator.share) {
-      navigator.share({ title: document.title, text: CFG.shareText || '小学口算出题、打印和计时练习，手机、平板、电脑都能用。', url: url }).catch(function () { /* 用户取消 */ });
-      return;
+  /* ---------------- 作业链接：网址里带上题型和设置，点开就是同一套题 ----------------
+     例：?n=0-10_0-10&o=as&r=0-10&q=30&mode=timer&per=40&cols=4&tab=practice
+     t=内置题型名称 · n=每个数的范围（_ 分隔，x10 整十、x100 整百）· o=运算符号（a加 s减 m乘 d除）· r=得数范围
+     c/b=有(y)无(n)进位、借位 · y=y 有余数 · mid=0 不限中间得数
+     q=训练题数 · mode=score/timer/limit · sec=限时秒数 · per=每页题数 · cols=每行几题 · form=fill/mix · title=作业名称 · tab=practice/sheet */
+  var OP_CODE = { '+': 'a', '-': 's', '*': 'm', '/': 'd' }, CODE_OP = { a: '+', s: '-', m: '*', d: '/' };
+  function specStr(s) { return s.min + '-' + s.max + (s.mult === 10 ? 'x10' : s.mult === 100 ? 'x100' : ''); }
+  function parseSpec(t) {
+    var m = /^(\d{1,5})-(\d{1,5})(?:x(10|100))?$/.exec(t || '');
+    return m ? { min: +m[1], max: +m[2], mult: m[3] ? +m[3] : 1 } : null;
+  }
+  function linkParams() {
+    var P = new URLSearchParams(), c = state.cfg, i;
+    var name = state.preset !== E.CUSTOM && E.isPresetCfg(state.preset, c) ? state.preset : E.matchPreset(c);
+    if (name) P.set('t', name);
+    else {
+      var n = [], o = [];
+      for (i = 0; i < c.count; i++) n.push(specStr(c.nums[i]));
+      for (i = 0; i < c.count - 1; i++) o.push(c.ops[i].map(function (x) { return OP_CODE[x]; }).join(''));
+      P.set('n', n.join('_')); P.set('o', o.join('_')); P.set('r', specStr(c.res));
+      if (c.count === 2) {
+        if (c.ops[0].indexOf('+') >= 0 && c.carry !== 'any') P.set('c', c.carry === 'yes' ? 'y' : 'n');
+        if (c.ops[0].indexOf('-') >= 0 && c.borrow !== 'any') P.set('b', c.borrow === 'yes' ? 'y' : 'n');
+        if (c.ops[0].indexOf('/') >= 0 && c.rem === 'yes') P.set('y', 'y');
+      } else if (c.midLimit === false) P.set('mid', '0');
     }
-    copyText(url, '网址已复制，可以发给家长或老师', '复制网址');
+    P.set('q', state.practice.count);
+    P.set('mode', state.practice.mode);
+    if (state.practice.mode === 'limit') P.set('sec', state.practice.limit);
+    P.set('per', state.sheet.perPage);
+    P.set('cols', state.sheet.cols);
+    if (state.sheet.form !== 'normal') P.set('form', state.sheet.form);
+    var t = (state.sheet.title || '').trim();
+    if (t) P.set('title', t);
+    P.set('tab', state.tab);
+    return P;
+  }
+  /* 按链接里的设置改好当前状态；看不懂的参数直接忽略（微信会自己加一些参数） */
+  function applyLink(P) {
+    var changed = false, t = P.get('t');
+    if (t && E.hasPreset(t)) { state.preset = t; state.cfg = E.presetCfg(t); changed = true; }
+    else if (P.get('n') && P.get('o') && P.get('r')) {
+      var ns = P.get('n').split('_').map(parseSpec), os = P.get('o').split('_'), res = parseSpec(P.get('r'));
+      var ops = os.map(function (s) { return s.split('').map(function (ch) { return CODE_OP[ch]; }).filter(Boolean); });
+      var good = ns.length >= 2 && ns.length <= 4 && os.length === ns.length - 1 && res &&
+        ns.every(function (s) { return !!s; }) && ops.every(function (a) { return a.length > 0; });
+      if (good) {
+        state.cfg = E.normalizeCfg({
+          count: ns.length, nums: ns, ops: ops, res: res,
+          carry: P.get('c') === 'y' ? 'yes' : P.get('c') === 'n' ? 'no' : 'any',
+          borrow: P.get('b') === 'y' ? 'yes' : P.get('b') === 'n' ? 'no' : 'any',
+          rem: P.get('y') === 'y' ? 'yes' : 'no', midLimit: P.get('mid') !== '0'
+        });
+        state.preset = E.matchPreset(state.cfg) || E.CUSTOM;
+        changed = true;
+      }
+    }
+    var q = parseInt(P.get('q'), 10);
+    if (COUNTS.indexOf(q) >= 0) { state.practice.count = q; changed = true; }
+    var mode = P.get('mode');
+    if (['score', 'timer', 'limit'].indexOf(mode) >= 0) { state.practice.mode = mode; changed = true; }
+    if (P.get('sec')) { state.practice.limit = clampInt(P.get('sec'), 5, 9999, state.practice.limit); changed = true; }
+    if (P.get('per')) { state.sheet.perPage = clampInt(P.get('per'), 1, 200, state.sheet.perPage); changed = true; }
+    if (P.get('cols')) { state.sheet.cols = clampInt(P.get('cols'), 1, 6, state.sheet.cols); changed = true; }
+    var form = P.get('form');
+    if (['normal', 'fill', 'mix'].indexOf(form) >= 0) { state.sheet.form = form; changed = true; }
+    if (P.has('title')) { state.sheet.title = (P.get('title') || '').slice(0, 40); changed = true; }
+    else if (changed) state.sheet.title = '';   // 新作业没写名称，就别沿用上一次的作业名称
+    var tab = P.get('tab');
+    return { changed: changed, tab: tab === 'practice' || tab === 'sheet' ? tab : null };
+  }
+  function settingsSummary() {
+    var c = state.cfg, s = state.sheet, p = state.practice, d = E.describe(c);
+    var formula = d.parts.map(function (x) { return x.op ? ' ' + x.op + ' ' : x.tok; }).join('') + (d.tags.length ? '（' + d.tags.join('、') + '）' : '');
+    return {
+      type: state.preset === E.CUSTOM ? '自定义 ' + formula : state.preset + '（' + formula + '）',
+      practice: p.count + ' 题，' + (p.mode === 'limit' ? '限时 ' + p.limit + ' 秒' : p.mode === 'timer' ? '计时' : '计分'),
+      sheet: '每页 ' + s.perPage + ' 题，每行 ' + s.cols + ' 题' + (s.form === 'fill' ? '，填空题' : s.form === 'mix' ? '，求得数和填空混合' : ''),
+      title: (s.title || '').trim()
+    };
+  }
+  function baseUrl() { return location.href.split(/[?#]/)[0]; }
+  var LINK_KEYS = ['t', 'n', 'o', 'r', 'c', 'b', 'y', 'mid', 'q', 'mode', 'sec', 'per', 'cols', 'form', 'title', 'tab'];
+  // 微信转发时自己加上的参数，生成链接时去掉
+  var WX_KEYS = ['from', 'isappinstalled', 'scene', 'clicktime', 'enterid', 'ascene', 'devicetype', 'version', 'lang', 'nettype',
+    'pass_ticket', 'wx_header', 'winzoom', 'sharer_shareid', 'sharer_sharetime', 'sharer_shareinfo', 'sharer_shareinfo_first'];
+  /* 网址里原有的其他参数（比如网站的访问码 sharecode）要原样带上，不然转发出去打不开 */
+  function keptParams() {
+    var P = new URLSearchParams();
+    try {
+      new URLSearchParams(location.search).forEach(function (v, k) {
+        if (LINK_KEYS.indexOf(k) < 0 && WX_KEYS.indexOf(k) < 0) P.append(k, v);
+      });
+    } catch (e) { /* 浏览器太旧就不带了 */ }
+    return P;
+  }
+  function shareLink() {
+    var P = keptParams();
+    if ($('#share-with').checked) linkParams().forEach(function (v, k) { P.set(k, v); });
+    var q = P.toString();
+    return baseUrl() + (q ? '?' + q : '');
+  }
+  function refreshShare() {
+    var sm = settingsSummary();
+    $('#share-sum').innerHTML = '<li><b>题型</b><span>' + esc(sm.type) + '</span></li>' +
+      '<li><b>口算训练</b><span>' + esc(sm.practice) + '</span></li>' +
+      '<li><b>打印</b><span>' + esc(sm.sheet) + '</span></li>';
+    $('#share-sum').hidden = !$('#share-with').checked;
+    $('#share-url').value = shareLink();
+  }
+  $('#btn-share').addEventListener('click', function () {
+    $('#share-name').value = state.sheet.title || '';
+    $('#share-wx').hidden = !isWeChat;
+    $('#share-sys').hidden = isWeChat || !navigator.share;
+    refreshShare();
+    openOverlay('#sharebox');
+  });
+  $('#share-name').addEventListener('input', function () {
+    state.sheet.title = this.value; $('#s-title').value = this.value;
+    renderSheets(); save(); refreshShare();
+  });
+  $('#share-with').addEventListener('change', refreshShare);
+  $('#share-url').addEventListener('focus', function () { this.select(); });
+  $('#share-copy').addEventListener('click', function () { copyText(shareLink(), '链接已复制，可以粘贴到微信群', '复制链接'); });
+  $('#share-wx').addEventListener('click', function () {
+    // 微信右上角「发送给朋友」发的是当前网址，所以先把网址换成带设置的链接
+    var url = shareLink(), q = url.indexOf('?');
+    try { history.replaceState(null, '', q >= 0 ? url.slice(q) : location.pathname); } catch (e) { /* 不支持就算了 */ }
+    closeOverlay($('#sharebox'));
+    $('#wxshare').hidden = false;
+  });
+  $('#share-sys').addEventListener('click', function () {
+    navigator.share({ title: document.title, text: CFG.shareText || '口算练习：点开就是同样的题型和设置。', url: shareLink() }).catch(function () { /* 用户取消 */ });
   });
   $('#wxshare').addEventListener('click', function () { this.hidden = true; });
 
@@ -2073,10 +2234,17 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
 
   var openId = null;
   function openOverlay(id) { $(id).hidden = false; openId = id; var c = $(id + ' [data-close]'); if (c) c.focus(); }
-  function closeOverlay() { if (!openId) return; $(openId).hidden = true; openId = null; }
+  /* 关掉指定的弹窗（不指定就关最上面那个）；弹窗可以叠着开，比如分享框上面再开复制框 */
+  function closeOverlay(el) {
+    var o = el || (openId && $(openId));
+    if (!o) return;
+    o.hidden = true;
+    var still = $$('.overlay').filter(function (x) { return !x.hidden; });
+    openId = still.length ? '#' + still[still.length - 1].id : null;
+  }
   $('#btn-help').addEventListener('click', function () { openOverlay('#help'); });
   $$('.overlay').forEach(function (o) {
-    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('[data-close]')) closeOverlay(); });
+    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('[data-close]')) closeOverlay(o); });
   });
 
   document.addEventListener('keydown', function (e) {
@@ -2114,6 +2282,15 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
     else document.addEventListener('WeixinJSBridgeReady', fix, false);
   })();
 
+  /* ---------------- 打开时如果网址里带着作业设置，就照着设置 ---------------- */
+  var fromLink = null;
+  try {
+    var LP = new URLSearchParams(location.search);
+    if (['t', 'n', 'q', 'mode', 'per', 'cols', 'form', 'title', 'tab'].some(function (k) { return LP.has(k); })) fromLink = applyLink(LP);
+  } catch (e) { fromLink = null; }
+  // 班级版可以给第一次打开的人一套默认设置（写法和作业链接一样）
+  if (!fromLink && !hadSaved && CFG.defaultQuery) { try { applyLink(new URLSearchParams(CFG.defaultQuery)); } catch (e) { /* 写错了就用默认 */ } }
+
   /* ---------------- 启动 ---------------- */
   fillPresetSelect($('#preset'));
   fillPresetSelect($('#p-preset'));
@@ -2127,8 +2304,17 @@ details.builder[open] > summary::before { transform: rotate(45deg); }
   if (!(window.matchMedia && window.matchMedia('(min-width: 980px)').matches)) $('#sheet-opts').open = false;
   // 第一次打开：手机平板进口算训练，电脑进出题打印；以后记住上次用的页面
   var firstTab = CFG.defaultTab === 'sheet' || CFG.defaultTab === 'practice' ? CFG.defaultTab : (coarse ? 'practice' : 'sheet');
-  var startTab = location.hash === '#practice' ? 'practice' : location.hash === '#sheet' ? 'sheet' : (hadSaved ? state.tab : firstTab);
+  var startTab = location.hash === '#practice' ? 'practice' : location.hash === '#sheet' ? 'sheet'
+    : (fromLink && fromLink.tab) || (hadSaved ? state.tab : firstTab);
   setTab(startTab, true);
+  if (fromLink && fromLink.changed) {
+    var sm = settingsSummary();
+    $('#link-banner-text').innerHTML = '已按收到的链接设好' + (sm.title ? '「' + esc(sm.title) + '」' : '') +
+      '：<b>' + esc(sm.type) + '</b> · 口算训练 ' + esc(sm.practice) + ' · 打印' + esc(sm.sheet);
+    $('#link-banner').hidden = false;
+    save();
+  }
+  $('#link-banner-close').addEventListener('click', function () { $('#link-banner').hidden = true; });
   window.addEventListener('beforeprint', fitSheets);
 })();
 </script>

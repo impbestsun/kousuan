@@ -1,0 +1,1875 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>口算练习</title>
+<meta name="description" content="小学口算出题、打印和计时训练：70多种题型，可自定义算式，支持填空题、答案页和限时练习。">
+<meta name="theme-color" content="#2E6A55">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='3' y='3' width='58' height='58' rx='10' fill='%23ffffff' stroke='%232E6A55' stroke-width='5'/%3E%3Cpath d='M32 8v48M8 32h48' stroke='%232E6A55' stroke-width='2' stroke-dasharray='4 4' opacity='.45'/%3E%3Ctext x='32' y='45' font-size='36' text-anchor='middle' font-family='KaiTi,STKaiti,serif' font-weight='700' fill='%232E6A55'%3E%E7%AE%97%3C/text%3E%3C/svg%3E">
+<style>
+/* Layout: exercise-book workbench — settings card on the left, live A4 worksheet preview on the right; practice is a grid of answer cards with a docked number pad. */
+:root {
+  --paper: #EEF3EF;
+  --grid: rgba(46, 106, 85, .075);
+  --mark-line: rgba(46, 106, 85, .38);
+  --surface: #FFFFFF;
+  --surface-2: #F4F8F5;
+  --ink: #1B2622;
+  --ink-2: #53625B;
+  --ink-3: #85938D;
+  --line: #D2DDD7;
+  --board: #2E6A55;
+  --board-hi: #235643;
+  --on-board: #FFFFFF;
+  --red: #C8372A;
+  --red-soft: #FBEAE7;
+  --gold: #9C6C12;
+  --gold-soft: #F7EDD5;
+  --active: #DCF1E3;
+  --shadow: 0 1px 2px rgba(27, 38, 34, .06), 0 6px 18px rgba(27, 38, 34, .07);
+  --sheet-paper: #FFFFFF;
+  --sheet-ink: #151515;
+  --sheet-mute: #6E6E6E;
+  --sheet-rule: #8F8F8F;
+  --sheet-ans: #C8372A;
+  --font-ui: "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
+  --font-kai: "Kaiti SC", "STKaiti", "KaiTi", "楷体", "BiauKai", "AR PL UKai CN", "Noto Serif CJK SC", serif;
+  --font-num: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1613;
+    --grid: rgba(140, 210, 175, .045);
+    --mark-line: rgba(140, 210, 175, .35);
+    --surface: #18211D;
+    --surface-2: #1E2925;
+    --ink: #E3ECE7;
+    --ink-2: #A2B2AA;
+    --ink-3: #72837B;
+    --line: #2C3933;
+    --board: #5DB08F;
+    --board-hi: #74C4A3;
+    --on-board: #0B1611;
+    --red: #FF7B6B;
+    --red-soft: #3A211D;
+    --gold: #E2B458;
+    --gold-soft: #33291A;
+    --active: #1D3A2C;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 6px 20px rgba(0, 0, 0, .28);
+    --sheet-paper: #F6F6F2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1613;
+  --grid: rgba(140, 210, 175, .045);
+  --mark-line: rgba(140, 210, 175, .35);
+  --surface: #18211D;
+  --surface-2: #1E2925;
+  --ink: #E3ECE7;
+  --ink-2: #A2B2AA;
+  --ink-3: #72837B;
+  --line: #2C3933;
+  --board: #5DB08F;
+  --board-hi: #74C4A3;
+  --on-board: #0B1611;
+  --red: #FF7B6B;
+  --red-soft: #3A211D;
+  --gold: #E2B458;
+  --gold-soft: #33291A;
+  --active: #1D3A2C;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 6px 20px rgba(0, 0, 0, .28);
+  --sheet-paper: #F6F6F2;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font: 15px/1.55 var(--font-ui);
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--board); outline-offset: 2px; }
+kbd {
+  font: 600 11px/1 var(--font-num);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid currentColor; opacity: .7;
+}
+
+.app {
+  max-width: 1320px; margin: 0 auto;
+  padding-block: 18px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 16px;
+}
+
+/* ---------- top bar ---------- */
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; min-width: 0; }
+.logo {
+  flex: none; width: 46px; height: 46px; border-radius: 6px;
+  border: 2px solid var(--board); background-color: var(--surface);
+  background-image:
+    repeating-linear-gradient(90deg, var(--mark-line) 0 3px, transparent 3px 6px),
+    repeating-linear-gradient(0deg, var(--mark-line) 0 3px, transparent 3px 6px);
+  background-size: 100% 1px, 1px 100%;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  display: grid; place-items: center;
+  font: 700 28px/1 var(--font-kai); color: var(--board);
+}
+.brand h1 { margin: 0; font: 700 25px/1.15 var(--font-kai); letter-spacing: .06em; text-wrap: balance; }
+.brand p { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-2); letter-spacing: .04em; }
+.tabs {
+  display: inline-flex; gap: 4px; padding: 4px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+}
+.tab {
+  border: 0; background: transparent; color: var(--ink-2);
+  font-weight: 600; font-size: 15px; padding: 8px 18px; border-radius: 999px; min-height: 40px;
+}
+.tab[aria-selected="true"] { background: var(--board); color: var(--on-board); }
+
+/* ---------- shared controls ---------- */
+.panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.btn {
+  appearance: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 40px; padding: 8px 14px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font-weight: 600; font-size: 14px; line-height: 1.2; white-space: nowrap;
+  touch-action: manipulation;
+}
+.btn:hover { border-color: var(--board); }
+.btn.primary { background: var(--board); border-color: var(--board); color: var(--on-board); }
+.btn.primary:hover { background: var(--board-hi); border-color: var(--board-hi); }
+.btn.quiet { background: transparent; border-color: transparent; color: var(--ink-2); }
+.btn.quiet:hover { color: var(--ink); border-color: var(--line); }
+.btn:disabled { opacity: .42; cursor: default; }
+.btn:disabled:hover { border-color: var(--line); }
+.btn.primary:disabled:hover { background: var(--board); border-color: var(--board); }
+.btn svg { width: 17px; height: 17px; flex: none; }
+.label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.hint { font-size: 12.5px; color: var(--ink-3); }
+select, .txt, .num {
+  min-height: 40px; padding: 7px 10px; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+  max-width: 100%;
+}
+select { padding-right: 28px; }
+.num { width: 4.6em; text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.num::-webkit-outer-spin-button, .num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num { -moz-appearance: textfield; appearance: textfield; }
+.txt { width: 100%; }
+.seg {
+  display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+}
+.seg button {
+  border: 0; background: transparent; color: var(--ink-2);
+  font-weight: 600; font-size: 13.5px; padding: 5px 11px; border-radius: 7px; min-height: 32px;
+  touch-action: manipulation;
+}
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--board); box-shadow: inset 0 0 0 1px var(--line), 0 1px 2px rgba(0,0,0,.08); }
+.chip {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  border-radius: 999px; padding: 3px 10px; min-height: 30px; font-size: 12.5px; font-weight: 600;
+  touch-action: manipulation;
+}
+.chip[aria-pressed="true"] { background: var(--board); border-color: var(--board); color: var(--on-board); }
+.msg {
+  border-radius: 10px; padding: 10px 14px; font-size: 14px;
+  background: var(--gold-soft); color: var(--ink); border: 1px solid var(--line);
+}
+.msg.error { background: var(--red-soft); }
+.msg b { color: var(--red); }
+
+/* ---------- worksheet view ---------- */
+.sheet-view { display: grid; gap: 16px; align-items: start; }
+@media (min-width: 980px) {
+  .sheet-view { grid-template-columns: 372px minmax(0, 1fr); }
+  .settings { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; }
+}
+.settings { padding: 16px; display: grid; gap: 18px; min-width: 0; }
+.settings section { display: grid; gap: 10px; }
+.settings h2 {
+  margin: 0; font: 700 16px/1.3 var(--font-kai); letter-spacing: .08em; color: var(--board);
+  display: flex; align-items: center; gap: 8px;
+}
+.settings h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.field { display: grid; gap: 6px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; }
+.formula {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  padding: 10px 12px; border-radius: 10px; background: var(--surface-2); border: 1px dashed var(--line);
+  font-size: 13.5px;
+}
+.formula .tok { padding: 2px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.formula .op { font: 700 16px/1 var(--font-num); color: var(--board); }
+.formula .tag { padding: 2px 8px; border-radius: 999px; background: var(--active); color: var(--board); font-weight: 600; font-size: 12.5px; }
+details.builder { border: 1px solid var(--line); border-radius: 10px; }
+details.builder > summary {
+  list-style: none; cursor: pointer; padding: 10px 12px; font-weight: 600; font-size: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+details.builder > summary::-webkit-details-marker { display: none; }
+details.builder > summary::before {
+  content: ""; width: 7px; height: 7px; border-right: 2px solid var(--ink-2); border-bottom: 2px solid var(--ink-2);
+  transform: rotate(-45deg); transition: transform .15s;
+}
+details.builder[open] > summary::before { transform: rotate(45deg); }
+.fb { display: grid; gap: 8px; padding: 2px 10px 14px; }
+.fb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 5px; font-size: 13.5px; }
+.fb-row .who { width: 4.3em; font-weight: 600; }
+.fb-row.res .who { color: var(--board); }
+.fb-row .num { width: 4.2em; padding-inline: 4px; }
+.fb-row .chip { padding-inline: 7px; }
+.fb-ops { display: flex; gap: 6px; padding-left: calc(4.3em * 13.5 / 15 + 5px); }
+.opchip {
+  width: 40px; height: 34px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2); font: 700 18px/1 var(--font-num);
+  touch-action: manipulation;
+}
+.opchip[aria-pressed="true"] { background: var(--board); border-color: var(--board); color: var(--on-board); }
+.fb-extra { display: grid; gap: 8px; padding-top: 6px; border-top: 1px dashed var(--line); }
+.fb-extra .field { grid-template-columns: 4.4em 1fr; align-items: center; gap: 7px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13.5px; }
+.check input { width: 18px; height: 18px; accent-color: var(--board); }
+
+.preview { display: grid; gap: 12px; min-width: 0; }
+.preview-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.preview-bar .summary { margin-right: auto; color: var(--ink-2); font-size: 14px; }
+.preview-bar .summary b { color: var(--ink); font-family: var(--font-num); }
+.note { font-size: 12.5px; color: var(--ink-3); }
+
+/* the printable sheet — every size is in "mm" via --mm, so the preview is a true scale model of A4 */
+#sheets { display: grid; gap: 18px; justify-items: center; --mm: 3px; min-width: 0; }
+.sheet {
+  width: calc(210 * var(--mm)); height: calc(296 * var(--mm));
+  padding: calc(13 * var(--mm)) calc(14 * var(--mm)) calc(9 * var(--mm));
+  background: var(--sheet-paper); color: var(--sheet-ink);
+  box-shadow: var(--shadow); border-radius: 2px;
+  display: flex; flex-direction: column; overflow: hidden;
+  font-family: var(--sheet-font, var(--font-num));
+}
+.sh-head {
+  text-align: center; display: grid; gap: calc(2.2 * var(--mm));
+  padding-bottom: calc(2.6 * var(--mm)); border-bottom: calc(.35 * var(--mm)) solid var(--sheet-rule);
+}
+.sh-title { margin: 0; font: 700 calc(6.4 * var(--mm))/1.15 var(--font-kai); letter-spacing: .1em; }
+.sh-title .key { color: var(--sheet-ans); }
+.sh-info { margin: 0; font-size: calc(3.9 * var(--mm)); line-height: 1.4; white-space: pre-wrap; font-family: var(--font-ui); }
+.sh-grid {
+  flex: 1; min-height: 0; display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  align-items: center; align-content: start;
+  padding-top: calc(2.5 * var(--mm));
+  font-size: calc(var(--fs) * var(--mm));
+  line-height: 1.2;
+}
+.sh-foot {
+  height: calc(5 * var(--mm)); display: flex; justify-content: flex-end; align-items: flex-end;
+  font-size: calc(2.8 * var(--mm)); color: var(--sheet-mute); font-family: var(--font-ui);
+}
+.q {
+  display: flex; align-items: baseline; white-space: nowrap; min-width: 0;
+  padding-left: calc(2 * var(--mm));
+  font-variant-numeric: tabular-nums;
+}
+.q .n { display: inline-block; min-width: calc(var(--w) * 1ch); text-align: right; }
+.q .v { display: inline-block; text-align: left; }
+.q .o { display: inline-block; width: 1.45em; text-align: center; }
+.q .a { display: inline-block; min-width: calc(var(--w) * 1ch + .9em); padding-left: .15em; }
+.q .d { display: inline-block; padding: 0 .1em; letter-spacing: -.05em; }
+.q .b { display: inline-flex; align-items: baseline; }
+.q .b i { font-style: normal; display: inline-block; min-width: calc(var(--w) * 1ch + .5em); text-align: center; }
+.q .ans { color: var(--sheet-ans); font-weight: 600; }
+
+/* ---------- practice view ---------- */
+.practice-view { display: grid; gap: 14px; }
+.pbar { padding: 14px 16px; display: grid; gap: 12px; }
+.pbar .row { align-items: end; }
+.pbar .grow { flex: 1 1 220px; }
+.pbar select { width: 100%; }
+.pbar .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.clockbox { margin-left: auto; display: flex; align-items: baseline; gap: 14px; }
+.clock { font: 700 30px/1 var(--font-num); font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--board); }
+.clock.warn { color: var(--red); }
+.progress { font-size: 14px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.limitbar { height: 5px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.limitbar span { display: block; height: 100%; width: 100%; background: var(--board); transform-origin: left; transition: transform .25s linear; }
+.limitbar.warn span { background: var(--red); }
+
+.pstage { position: relative; }
+.pgrid {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-min, 250px)), 1fr));
+}
+.pstage.cover .pgrid { filter: blur(7px); pointer-events: none; user-select: none; }
+.pcover {
+  position: absolute; inset: 0; display: none; align-content: start; justify-items: center; gap: 10px;
+  text-align: center; color: var(--ink-2); font-size: 14px; padding: clamp(36px, 10vh, 120px) 16px 16px;
+}
+.pstage.cover .pcover { display: grid; }
+.pcover .btn { font-size: 18px; min-height: 54px; padding: 10px 28px; border-radius: 14px; }
+.pcard {
+  position: relative; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  padding: 12px 42px 12px 14px; min-height: 72px; border-radius: 12px;
+  background: var(--surface); border: 1.5px solid var(--line);
+  font: 600 clamp(22px, 1.4vw + 15px, 29px)/1.2 var(--font-num); font-variant-numeric: tabular-nums;
+  scroll-margin: 90px 0 280px;
+}
+.pcard .idx { position: absolute; left: 8px; top: 5px; font: 600 11px/1 var(--font-num); color: var(--ink-3); }
+.pcard .expr { display: inline-flex; align-items: center; white-space: nowrap; }
+.pcard .o { display: inline-block; width: 1.25em; text-align: center; color: var(--ink-2); }
+.pcard .d { padding: 0 .08em; color: var(--ink-2); letter-spacing: -.05em; }
+.pcard.active { background: var(--active); border-color: var(--board); }
+.pin {
+  width: calc(var(--w, 2) * 1ch + 1em); padding: 2px 4px; margin: 0 2px;
+  font: inherit; text-align: center; color: var(--board);
+  background: var(--surface-2); border: 0; border-bottom: 2.5px solid var(--line); border-radius: 7px 7px 0 0;
+}
+.pin:focus { outline: none; border-bottom-color: var(--board); background: var(--surface); }
+.pin:disabled { opacity: 1; -webkit-text-fill-color: currentColor; }
+.pcard.blank .paren { color: var(--ink-2); }
+.pcard .mark { position: absolute; right: 8px; top: 50%; width: 32px; height: 32px; margin-top: -16px; color: var(--red); }
+.pcard.wrong { background: var(--red-soft); border-color: var(--red); }
+.pcard .fix { margin-top: 4px; font: 600 13px/1.3 var(--font-ui); color: var(--red); }
+.pcard.right .pin, .pcard.wrong .pin { background: transparent; }
+.pmsg { padding: 18px; text-align: center; }
+
+.keypad {
+  position: sticky; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+  width: min(100%, 440px); justify-self: center;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 9px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow);
+}
+.keypad button {
+  min-height: 52px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2);
+  font: 700 24px/1 var(--font-num); color: var(--ink); touch-action: manipulation; user-select: none;
+}
+.keypad button:active { background: var(--active); }
+.keypad .k-next { background: var(--board); border-color: var(--board); color: var(--on-board); font: 700 17px/1 var(--font-ui); }
+.keypad .k-back { font-size: 20px; }
+
+.result { padding: 18px; display: grid; gap: 16px; }
+.result-main { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 30px; }
+.score { display: flex; align-items: baseline; gap: 4px; color: var(--red); }
+.score b {
+  font: 700 64px/1 var(--font-kai);
+  text-decoration: underline double; text-decoration-thickness: 2px; text-underline-offset: 10px;
+}
+.score span { font: 700 20px/1 var(--font-kai); }
+.seal {
+  display: grid; place-items: center; min-width: 74px; height: 74px; padding: 0 10px;
+  border: 3px double var(--board); border-radius: 10px; color: var(--board);
+  font: 700 26px/1 var(--font-kai); letter-spacing: .08em; transform: rotate(-4deg);
+}
+.seal.top { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; }
+.stats div { display: grid; gap: 2px; }
+.stats dt { font-size: 12.5px; color: var(--ink-2); }
+.stats dd { margin: 0; font: 700 22px/1.1 var(--font-num); font-variant-numeric: tabular-nums; }
+.ladder { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.ladder li { padding: 3px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-3); border: 1px solid var(--line); }
+.ladder li.on { background: var(--board); border-color: var(--board); color: var(--on-board); font-weight: 700; }
+.ladder li.top.on { background: var(--gold); border-color: var(--gold); color: var(--on-board); }
+.result-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.history { padding: 14px 16px; display: grid; gap: 10px; }
+.history h2 { margin: 0; font: 700 16px/1.3 var(--font-kai); letter-spacing: .08em; color: var(--board); }
+.htable-wrap { overflow-x: auto; }
+.htable { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.htable th, .htable td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.htable th { font-weight: 600; color: var(--ink-2); font-size: 12.5px; }
+.htable td.sc { color: var(--red); font-weight: 700; }
+
+/* ---------- dialogs ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(10, 18, 14, .45);
+}
+.dialog {
+  width: min(680px, 100%); max-height: 100%; overflow: auto;
+  background: var(--surface); color: var(--ink); border-radius: 16px; box-shadow: var(--shadow);
+  padding: 20px 22px; display: grid; gap: 12px;
+}
+.dialog h2 { margin: 0; font: 700 21px/1.3 var(--font-kai); letter-spacing: .06em; }
+.dialog h3 { margin: 6px 0 0; font-size: 15px; color: var(--board); }
+.dialog p, .dialog li { margin: 0; font-size: 14px; color: var(--ink); }
+.dialog ul, .dialog ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.dialog .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dialog textarea { width: 100%; min-height: 220px; font: 13px/1.5 var(--font-num); padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  transform: translateX(-50%); background: var(--ink); color: var(--paper);
+  padding: 10px 16px; border-radius: 10px; font-size: 14px; box-shadow: var(--shadow);
+}
+
+@media (pointer: coarse) { kbd, .kbd-hint { display: none; } }
+@media (max-width: 560px) {
+  .tabs { width: 100%; order: 3; }
+  .tab { flex: 1; }
+  #btn-help { order: 2; }
+  .clockbox { margin-left: 0; width: 100%; justify-content: space-between; }
+  .score b { font-size: 54px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* ---------- print: only the sheets, at true A4 size ---------- */
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .topbar, .settings, .preview-bar, .msg, .note, #view-practice, .overlay, .toast { display: none !important; }
+  #view-sheet, #view-sheet[hidden] { display: block !important; }
+  .app, .sheet-view, .preview, #sheets { display: block !important; padding: 0 !important; margin: 0 !important; max-width: none !important; gap: 0 !important; }
+  #sheets { --mm: 1mm !important; }
+  .sheet { box-shadow: none !important; border-radius: 0 !important; background: #fff !important; break-after: page; page-break-after: always; }
+  .sheet:last-child { break-after: auto; page-break-after: auto; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">算</div>
+      <div>
+        <h1>口算练习</h1>
+        <p>出题 · 打印 · 计时训练</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="功能">
+      <button class="tab" role="tab" id="tab-sheet" aria-controls="view-sheet" aria-selected="true">出题打印</button>
+      <button class="tab" role="tab" id="tab-practice" aria-controls="view-practice" aria-selected="false">口算训练</button>
+    </nav>
+    <button class="btn quiet" id="btn-help" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>
+      使用说明
+    </button>
+  </header>
+
+  <!-- ============ 出题打印 ============ -->
+  <section id="view-sheet" class="sheet-view" role="tabpanel" aria-labelledby="tab-sheet">
+    <aside class="panel settings" aria-label="出题设置">
+      <section>
+        <h2>题型</h2>
+        <div class="field">
+          <label class="label" for="preset">选择题型</label>
+          <select id="preset"></select>
+        </div>
+        <div class="formula" id="formula" aria-live="polite"></div>
+        <details class="builder" id="builder">
+          <summary>修改算式（数的范围、运算符号、进位借位）</summary>
+          <div class="fb">
+            <div class="fb-row">
+              <span class="who">几个数</span>
+              <div class="seg" id="f-count" role="group" aria-label="运算数个数">
+                <button type="button" data-v="2" aria-pressed="true">2 个数</button>
+                <button type="button" data-v="3" aria-pressed="false">3 个数</button>
+                <button type="button" data-v="4" aria-pressed="false">4 个数</button>
+              </div>
+            </div>
+            <div class="fb-row" data-num="0">
+              <span class="who">第1个数</span>
+              <input class="num" id="n0-min" type="number" inputmode="numeric" min="0" max="10000" aria-label="第1个数最小值"><span>到</span>
+              <input class="num" id="n0-max" type="number" inputmode="numeric" min="0" max="10000" aria-label="第1个数最大值">
+              <button type="button" class="chip" id="n0-m10" data-mult="10" aria-pressed="false">整十</button>
+              <button type="button" class="chip" id="n0-m100" data-mult="100" aria-pressed="false">整百</button>
+            </div>
+            <div class="fb-ops" data-op="0" role="group" aria-label="第1个运算符号">
+              <button type="button" class="opchip" data-o="+" aria-label="加">+</button><button type="button" class="opchip" data-o="-" aria-label="减">−</button><button type="button" class="opchip" data-o="*" aria-label="乘">×</button><button type="button" class="opchip" data-o="/" aria-label="除">÷</button>
+            </div>
+            <div class="fb-row" data-num="1">
+              <span class="who">第2个数</span>
+              <input class="num" id="n1-min" type="number" inputmode="numeric" min="0" max="10000" aria-label="第2个数最小值"><span>到</span>
+              <input class="num" id="n1-max" type="number" inputmode="numeric" min="0" max="10000" aria-label="第2个数最大值">
+              <button type="button" class="chip" id="n1-m10" data-mult="10" aria-pressed="false">整十</button>
+              <button type="button" class="chip" id="n1-m100" data-mult="100" aria-pressed="false">整百</button>
+            </div>
+            <div class="fb-ops" data-op="1" role="group" aria-label="第2个运算符号">
+              <button type="button" class="opchip" data-o="+" aria-label="加">+</button><button type="button" class="opchip" data-o="-" aria-label="减">−</button><button type="button" class="opchip" data-o="*" aria-label="乘">×</button><button type="button" class="opchip" data-o="/" aria-label="除">÷</button>
+            </div>
+            <div class="fb-row" data-num="2">
+              <span class="who">第3个数</span>
+              <input class="num" id="n2-min" type="number" inputmode="numeric" min="0" max="10000" aria-label="第3个数最小值"><span>到</span>
+              <input class="num" id="n2-max" type="number" inputmode="numeric" min="0" max="10000" aria-label="第3个数最大值">
+              <button type="button" class="chip" id="n2-m10" data-mult="10" aria-pressed="false">整十</button>
+              <button type="button" class="chip" id="n2-m100" data-mult="100" aria-pressed="false">整百</button>
+            </div>
+            <div class="fb-ops" data-op="2" role="group" aria-label="第3个运算符号">
+              <button type="button" class="opchip" data-o="+" aria-label="加">+</button><button type="button" class="opchip" data-o="-" aria-label="减">−</button><button type="button" class="opchip" data-o="*" aria-label="乘">×</button><button type="button" class="opchip" data-o="/" aria-label="除">÷</button>
+            </div>
+            <div class="fb-row" data-num="3">
+              <span class="who">第4个数</span>
+              <input class="num" id="n3-min" type="number" inputmode="numeric" min="0" max="10000" aria-label="第4个数最小值"><span>到</span>
+              <input class="num" id="n3-max" type="number" inputmode="numeric" min="0" max="10000" aria-label="第4个数最大值">
+              <button type="button" class="chip" id="n3-m10" data-mult="10" aria-pressed="false">整十</button>
+              <button type="button" class="chip" id="n3-m100" data-mult="100" aria-pressed="false">整百</button>
+            </div>
+            <div class="fb-row res" data-num="res">
+              <span class="who">= 得数</span>
+              <input class="num" id="r-min" type="number" inputmode="numeric" min="0" max="10000" aria-label="得数最小值"><span>到</span>
+              <input class="num" id="r-max" type="number" inputmode="numeric" min="0" max="10000" aria-label="得数最大值">
+              <button type="button" class="chip" id="r-m10" data-mult="10" aria-pressed="false">整十</button>
+              <button type="button" class="chip" id="r-m100" data-mult="100" aria-pressed="false">整百</button>
+            </div>
+            <div class="fb-extra" id="f-extra">
+              <div class="field" id="f-carry-field">
+                <span class="label">加法</span>
+                <div class="seg" id="f-carry" role="group" aria-label="进位">
+                  <button type="button" data-v="any">不限</button><button type="button" data-v="yes">有进位</button><button type="button" data-v="no">无进位</button>
+                </div>
+              </div>
+              <div class="field" id="f-borrow-field">
+                <span class="label">减法</span>
+                <div class="seg" id="f-borrow" role="group" aria-label="借位">
+                  <button type="button" data-v="any">不限</button><button type="button" data-v="yes">有借位</button><button type="button" data-v="no">无借位</button>
+                </div>
+              </div>
+              <div class="field" id="f-rem-field">
+                <span class="label">除法</span>
+                <div class="seg" id="f-rem" role="group" aria-label="余数">
+                  <button type="button" data-v="no">无余数</button><button type="button" data-v="yes">有余数</button>
+                </div>
+              </div>
+              <label class="check" id="f-mid-field"><input type="checkbox" id="f-mid"> 中间得数也不超过得数的最大值</label>
+              <p class="hint" id="f-extra-note">进位、借位、余数只用于两个数的算式。</p>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section>
+        <h2>试卷</h2>
+        <div class="row">
+          <div class="field">
+            <label class="label" for="s-per">每页题数</label>
+            <input class="num" id="s-per" type="number" inputmode="numeric" min="1" max="200">
+          </div>
+          <div class="field">
+            <label class="label" for="s-cols">每行几题</label>
+            <input class="num" id="s-cols" type="number" inputmode="numeric" min="1" max="6">
+          </div>
+          <div class="field">
+            <label class="label" for="s-pages">页数</label>
+            <input class="num" id="s-pages" type="number" inputmode="numeric" min="1" max="30">
+          </div>
+        </div>
+        <div class="field">
+          <span class="label">题目形式</span>
+          <div class="seg" id="s-form" role="group" aria-label="题目形式">
+            <button type="button" data-v="normal">求得数</button><button type="button" data-v="fill">填空题</button><button type="button" data-v="mix">两种混合</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="label">答案</span>
+          <div class="seg" id="s-ans" role="group" aria-label="答案">
+            <button type="button" data-v="none">不显示</button><button type="button" data-v="inline">写在题目上</button><button type="button" data-v="key">另附答案页</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="label">字体</span>
+          <div class="seg" id="s-font" role="group" aria-label="字体">
+            <button type="button" data-v="sans">黑体</button><button type="button" data-v="kai">楷体</button><button type="button" data-v="song">宋体</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="s-title">试卷标题</label>
+          <input class="txt" id="s-title" type="text" maxlength="40" placeholder="不填就用题型名称">
+        </div>
+        <div class="field">
+          <label class="label" for="s-info">标题下面一行</label>
+          <input class="txt" id="s-info" type="text" maxlength="80">
+        </div>
+      </section>
+    </aside>
+
+    <main class="preview" aria-label="试卷预览">
+      <div class="preview-bar">
+        <div class="summary" id="summary"></div>
+        <button class="btn" id="btn-regen" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+          换一批题
+        </button>
+        <button class="btn" id="btn-copy" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M15.5 8.5V5.5a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3"/></svg>
+          复制题目
+        </button>
+        <button class="btn primary" id="btn-print" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6.5 14h11v6.5h-11z"/></svg>
+          打印
+        </button>
+      </div>
+      <p class="note" id="print-note"></p>
+      <div class="msg" id="sheet-msg" role="status" hidden></div>
+      <div id="sheets"></div>
+    </main>
+  </section>
+
+  <!-- ============ 口算训练 ============ -->
+  <section id="view-practice" class="practice-view" role="tabpanel" aria-labelledby="tab-practice" hidden>
+    <div class="panel pbar">
+      <div class="row">
+        <div class="field grow">
+          <label class="label" for="p-preset">题型</label>
+          <select id="p-preset"></select>
+        </div>
+        <div class="field">
+          <span class="label">模式</span>
+          <div class="seg" id="p-mode" role="group" aria-label="训练模式">
+            <button type="button" data-v="score">计分</button><button type="button" data-v="timer">计时</button><button type="button" data-v="limit">限时</button>
+          </div>
+        </div>
+        <div class="field" id="p-limit-field">
+          <label class="label" for="p-limit">限时（秒）</label>
+          <input class="num" id="p-limit" type="number" inputmode="numeric" min="5" max="9999">
+        </div>
+        <div class="field">
+          <span class="label">题数</span>
+          <div class="seg" id="p-count" role="group" aria-label="题数">
+            <button type="button" data-v="10">10</button><button type="button" data-v="20">20</button><button type="button" data-v="30">30</button><button type="button" data-v="50">50</button>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="p-new" type="button">出题 <kbd>C</kbd></button>
+        <button class="btn primary" id="p-start" type="button">开始 <kbd>S</kbd></button>
+        <button class="btn" id="p-finish" type="button">交卷 <kbd>F</kbd></button>
+        <button class="btn quiet" id="p-keys" type="button" aria-pressed="false">屏幕键盘</button>
+        <div class="clockbox">
+          <span class="progress" id="p-progress"></span>
+          <span class="clock" id="p-clock" role="timer">00:00</span>
+        </div>
+      </div>
+      <div class="limitbar" id="p-limitbar"><span></span></div>
+    </div>
+
+    <div class="panel result" id="p-result" aria-live="polite" hidden></div>
+
+    <div class="pstage" id="p-stage">
+      <div class="pgrid" id="p-grid"></div>
+      <div class="pcover">
+        <button class="btn primary" id="p-cover-start" type="button">开始做题</button>
+        <span>准备好了就点开始<span class="kbd-hint">，也可以按 S 键</span></span>
+      </div>
+    </div>
+
+    <div class="keypad" id="keypad" hidden>
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+      <button type="button" data-k="back" class="k-back" aria-label="删除">⌫</button><button type="button" data-k="0">0</button><button type="button" data-k="next" class="k-next">下一题</button>
+    </div>
+
+    <div class="panel history" id="p-history"></div>
+  </section>
+</div>
+
+<div class="overlay" id="help" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="head">
+      <h2 id="help-title">使用说明</h2>
+      <button class="btn quiet" type="button" data-close>关闭</button>
+    </div>
+    <h3>出题打印</h3>
+    <ol>
+      <li>在「选择题型」里挑一种，比如「20以内的进位加法」，右边马上出一整页题。</li>
+      <li>不满意就点「换一批题」。题目会尽量不重复；符合条件的算式不够多时才会重复。</li>
+      <li>点「打印」，纸张选 A4。想留电子版，在打印窗口里选「存储为 PDF」。</li>
+      <li>「题目形式」可以选填空题，比如 8 +（　）= 15；「答案」可以写在题目上，或者另附答案页给家长对答案。</li>
+      <li>「复制题目」会把题目复制下来，可以粘贴到 Word 或 WPS 里再排版。</li>
+    </ol>
+    <h3>修改算式</h3>
+    <ul>
+      <li>每个数可以设最小值和最大值（0 到 10000），也可以限定为整十数（10、20、380……）或整百数（100、500……）。</li>
+      <li>两个数之间的运算符号可以选一个，也可以选几个（随机出现），但不能一个都不选。</li>
+      <li>得数同样可以限定范围、整十数或整百数。算式最多 4 个数，按先乘除后加减计算，中间不会出现负数。</li>
+      <li>有进位/无进位、有借位/无借位、有余数/无余数，只对两个数的算式有效。</li>
+      <li>选了题型以后再改算式，会变成「自定义题型」，不会影响原来的题型。</li>
+      <li>小窍门：如果 0 或 1 出现得太多，把某个数的最小值改成 2 就行；除法想少出现「被除数和除数一样」的题，把得数最小值改成 2。</li>
+    </ul>
+    <h3>口算训练</h3>
+    <ul>
+      <li>训练的题型和「出题打印」里选的一样。先选模式：<b>计分</b>只看对错；<b>计时</b>记下做完用了多久；<b>限时</b>在规定秒数内做，时间到自动交卷。</li>
+      <li>点「开始」后在答案框里输入，按回车或「下一题」跳到下一道。平板上可以用「屏幕键盘」。</li>
+      <li>快捷键：开始 S，交卷 F，出题 C。</li>
+      <li>交卷后自动打分。等级按错题数评（以 30 题为准）：全对是状元，错 1 题榜眼，错 2 题探花，然后是进士、同进士、举人、秀才、童生、启蒙、婴儿。</li>
+    </ul>
+    <h3>其他</h3>
+    <ul>
+      <li>设置和练习记录只保存在这台设备的浏览器里。</li>
+      <li>在微信里打开时不能打印，请点右上角「…」选「在浏览器打开」。</li>
+      <li>为了保护眼睛，不要长时间在屏幕上做题。</li>
+      <li>本网页参照老师提供的「口算大师全能标准版」重新制作，题型设置与原软件一致。</li>
+    </ul>
+  </div>
+</div>
+
+<div class="overlay" id="copybox" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="copy-title">
+    <div class="head">
+      <h2 id="copy-title">复制题目</h2>
+      <button class="btn quiet" type="button" data-close>关闭</button>
+    </div>
+    <p>没能自动复制。文字已经选中，请按 Ctrl+C（苹果电脑按 ⌘+C）复制。</p>
+    <textarea id="copy-text" readonly></textarea>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script id="engine">
+/* 口算出题引擎：题型表、出题、判分。纯函数，不依赖页面。 */
+(function (root) {
+  'use strict';
+
+  var SYM = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+  var OP_ORDER = ['+', '-', '*', '/'];
+  var ENUM_LIMIT = 400000;
+  var MAXV = 10000;
+  var RANKS = ['婴儿', '启蒙', '童生', '秀才', '举人', '同进士', '进士', '探花', '榜眼', '状元'];
+
+  function spec(min, max, mult) { return { min: min, max: max, mult: mult || 1 }; }
+  function multOf(s) { return s.mult === 10 || s.mult === 100 ? s.mult : 1; }
+  function setOf(s) {
+    var m = multOf(s);
+    var lo = Math.ceil(s.min / m) * m;
+    var n = s.max >= lo ? Math.floor((s.max - lo) / m) + 1 : 0;
+    return { lo: lo, step: m, n: n };
+  }
+  function inSpec(v, s) { return v >= s.min && v <= s.max && v % multOf(s) === 0; }
+  function rint(n) { return Math.floor(Math.random() * n); }
+  function pick(set) { return set.lo + set.step * rint(set.n); }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = rint(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  /* ---- 题型表：数值取自原软件「口算大师全能标准版」的内置题型 ---- */
+  var OPSET = { '+': ['+'], '-': ['-'], '+-': ['+', '-'], '*': ['*'], '/': ['/'] };
+  // cbr: 0 不限, 1 有进位, 2 无进位, 3 有借位, 4 无借位（与原软件编码一致）
+  function P(name, nums, ops, res, cbr) {
+    var cfg = {
+      count: nums.length,
+      nums: [], ops: [],
+      res: spec(res[0], res[1], res[2]),
+      carry: cbr === 1 ? 'yes' : cbr === 2 ? 'no' : 'any',
+      borrow: cbr === 3 ? 'yes' : cbr === 4 ? 'no' : 'any',
+      rem: 'no',
+      midLimit: true
+    };
+    for (var i = 0; i < 4; i++) cfg.nums.push(nums[i] ? spec(nums[i][0], nums[i][1], nums[i][2]) : spec(1, 10, 1));
+    for (var j = 0; j < 3; j++) cfg.ops.push(ops[j] ? OPSET[ops[j]].slice() : ['+']);
+    return { name: name, cfg: cfg };
+  }
+  var CUSTOM = '自定义题型';
+  var CUSTOM_CFG = P(CUSTOM, [[1, 10], [1, 10]], ['+'], [1, 10]).cfg;
+  var GROUPS = [
+    { label: '5以内、10以内', items: [
+      P('5以内加法', [[0, 5], [1, 5]], ['+'], [1, 5]),
+      P('5以内减法', [[1, 5], [0, 5]], ['-'], [0, 5]),
+      P('5以内的加减混合', [[0, 5], [0, 5]], ['+-'], [0, 5]),
+      P('10以内的加法', [[1, 10], [1, 10]], ['+'], [0, 10]),
+      P('10以内的连加', [[1, 10], [1, 10], [1, 10]], ['+', '+'], [0, 10]),
+      P('10以内的减法', [[1, 10], [1, 10]], ['-'], [0, 10]),
+      P('10以内的加减混合', [[1, 10], [1, 10]], ['+-'], [0, 10]),
+      P('10以内的连减', [[1, 10], [1, 10], [1, 10]], ['-', '-'], [0, 10]),
+      P('10以内的连加减', [[1, 10], [1, 10], [1, 10]], ['+-', '+-'], [0, 10])
+    ] },
+    { label: '20以内', items: [
+      P('9加几', [[9, 9], [1, 10]], ['+'], [0, 19]),
+      P('几加9', [[1, 10], [9, 9]], ['+'], [0, 19]),
+      P('5、4、3、2加几', [[2, 5], [1, 9]], ['+'], [0, 19]),
+      P('几加5、4、3、2', [[1, 9], [2, 5]], ['+'], [0, 19]),
+      P('9、8、7、6加几', [[6, 9], [1, 10]], ['+'], [10, 19]),
+      P('几加9、8、7、6', [[1, 10], [6, 9]], ['+'], [10, 19]),
+      P('20以内的不进位加法', [[1, 20], [1, 20]], ['+'], [1, 20], 2),
+      P('20以内的进位加法', [[1, 20], [1, 20]], ['+'], [1, 20], 1),
+      P('20以内的加法', [[1, 20], [1, 20]], ['+'], [1, 20]),
+      P('20以内的不借位减法', [[1, 20], [1, 20]], ['-'], [0, 20], 4),
+      P('20以内的借位减法', [[1, 20], [1, 20]], ['-'], [0, 20], 3),
+      P('20以内的减法', [[1, 20], [1, 20]], ['-'], [0, 20]),
+      P('20以内的加减混合', [[1, 20], [1, 20]], ['+-'], [0, 20]),
+      P('20以内的连加', [[1, 20], [1, 20], [1, 20]], ['+', '+'], [1, 20]),
+      P('20以内的连减', [[1, 20], [1, 20], [1, 20]], ['-', '-'], [0, 20]),
+      P('20以内的连加减', [[1, 20], [1, 20], [1, 20]], ['+-', '+-'], [0, 20])
+    ] },
+    { label: '100以内', items: [
+      P('100以内的不进位加法', [[1, 100], [1, 100]], ['+'], [1, 100], 2),
+      P('100以内的进位加法', [[1, 100], [1, 100]], ['+'], [1, 100], 1),
+      P('100以内的加法', [[1, 100], [1, 100]], ['+'], [1, 100]),
+      P('100以内的不借位减法', [[1, 100], [1, 100]], ['-'], [0, 100], 4),
+      P('100以内的借位减法', [[1, 100], [1, 100]], ['-'], [0, 100], 3),
+      P('100以内的减法', [[1, 100], [1, 100]], ['-'], [0, 100]),
+      P('100以内的加减法混合', [[1, 100], [1, 100]], ['+-'], [0, 100]),
+      P('100以内的连加', [[1, 100], [1, 100], [1, 100]], ['+', '+'], [0, 100]),
+      P('100以内的连减', [[1, 100], [1, 100], [1, 100]], ['-', '-'], [0, 100]),
+      P('100以内的连加减', [[1, 100], [1, 100], [1, 100]], ['+-', '+-'], [0, 100])
+    ] },
+    { label: '整十数、两位数、三位数加减', items: [
+      P('整十数加一位数', [[1, 99, 10], [1, 9]], ['+'], [1, 200]),
+      P('得数为整十数的减法', [[1, 100], [1, 9]], ['-'], [1, 100, 10]),
+      P('整十数加减整十数', [[1, 100, 10], [1, 100, 10]], ['+-'], [1, 100]),
+      P('两位数加一位数', [[10, 99], [1, 9]], ['+'], [1, 100]),
+      P('两位数加整十数', [[10, 99], [1, 100, 10]], ['+'], [0, 100]),
+      P('两位数加两位数', [[10, 99], [10, 99]], ['+'], [1, 100]),
+      P('两位数减整十数', [[10, 99], [1, 99, 10]], ['-'], [0, 100]),
+      P('两位数减一位数', [[10, 99], [1, 9]], ['-'], [1, 100]),
+      P('两位数减两位数', [[10, 99], [10, 99]], ['-'], [0, 100]),
+      P('两位数减两位数-借位', [[10, 100], [10, 100]], ['-'], [0, 100], 3),
+      P('两位数加两位数-进位', [[10, 100], [10, 100]], ['+'], [0, 100], 1),
+      P('两位数减两位数-不借位', [[10, 100], [10, 100]], ['-'], [0, 100], 4),
+      P('两位数加两位数-不进位', [[10, 100], [10, 100]], ['+'], [0, 100], 2),
+      P('三位数加三位数', [[100, 999], [100, 999]], ['+'], [0, 2000]),
+      P('三位数减三位数', [[100, 999], [100, 999]], ['-'], [1, 1000])
+    ] },
+    { label: '乘法口诀、乘加乘减', items: [
+      P('1到5的乘法口诀', [[1, 5], [1, 9]], ['*'], [1, 100]),
+      P('6到9的乘法口诀', [[6, 9], [1, 9]], ['*'], [1, 100]),
+      P('1到9的乘法口诀', [[1, 9], [2, 9]], ['*'], [1, 100]),
+      P('1到9的乘法口诀求商', [[1, 81], [1, 9]], ['/'], [1, 9]),
+      P('5以内乘加', [[1, 5], [1, 5], [1, 25]], ['*', '+'], [0, 100]),
+      P('5以内乘减', [[1, 5], [1, 5], [1, 25]], ['*', '-'], [0, 100]),
+      P('9以内乘加', [[1, 9], [1, 9], [1, 81]], ['*', '+'], [0, 100]),
+      P('9以内乘减', [[1, 9], [1, 9], [1, 81]], ['*', '-'], [0, 100])
+    ] },
+    { label: '整百整十、多位数乘除', items: [
+      P('整百数加减法', [[100, 999, 100], [100, 999, 100]], ['+-'], [0, 1000]),
+      P('1000以内整十数加减法', [[1, 1000, 10], [1, 1000, 10]], ['+-'], [0, 1000]),
+      P('整十数乘以一位数', [[1, 100, 10], [2, 9]], ['*'], [0, 1000]),
+      P('两位数乘以一位数-积两位', [[10, 99], [2, 9]], ['*'], [10, 99]),
+      P('整百数乘以一位数', [[1, 1000, 100], [1, 9]], ['*'], [0, 10000]),
+      P('三位整十数乘以一位数', [[100, 999, 10], [1, 9]], ['*'], [1000, 9999]),
+      P('整十数除以一位数', [[1, 1000, 10], [2, 9]], ['/'], [0, 100]),
+      P('两位数除以一位数', [[10, 99], [2, 9]], ['/'], [0, 100]),
+      P('三位数除以一位数', [[100, 999], [1, 9]], ['/'], [0, 1000]),
+      P('两位数乘以整十数', [[10, 99], [10, 99, 10]], ['*'], [0, 10000]),
+      P('两位数乘以两位数', [[10, 99], [10, 99]], ['*'], [0, 10000]),
+      P('整百数除以一位数', [[100, 10000, 100], [1, 9]], ['/'], [0, 1000]),
+      P('三位整十数乘以两位整十数', [[100, 1000, 10], [10, 99, 10]], ['*'], [1000, 10000])
+    ] }
+  ];
+  var BY_NAME = {};
+  GROUPS.forEach(function (g) { g.items.forEach(function (p) { BY_NAME[p.name] = p; }); });
+
+  function cloneCfg(c) { return JSON.parse(JSON.stringify(c)); }
+  function presetCfg(name) { var p = BY_NAME[name]; return cloneCfg(p ? p.cfg : CUSTOM_CFG); }
+
+  function toInt(v, lo, hi, d) {
+    var n = parseInt(v, 10);
+    if (!isFinite(n)) n = d;
+    return Math.min(hi, Math.max(lo, n));
+  }
+  /* 把任意（可能来自旧存档的）设置整理成合法的设置 */
+  function normalizeCfg(c) {
+    var base = cloneCfg(CUSTOM_CFG), out = cloneCfg(CUSTOM_CFG);
+    c = c || {};
+    out.count = toInt(c.count, 2, 4, 2);
+    function ns(s, d) {
+      s = s || {};
+      return spec(toInt(s.min, 0, MAXV, d.min), toInt(s.max, 0, MAXV, d.max), s.mult === 10 || s.mult === 100 ? s.mult : 1);
+    }
+    for (var i = 0; i < 4; i++) out.nums[i] = ns(c.nums && c.nums[i], base.nums[i]);
+    for (var j = 0; j < 3; j++) {
+      var arr = (c.ops && c.ops[j]) || [];
+      out.ops[j] = OP_ORDER.filter(function (o) { return arr.indexOf(o) >= 0; });
+    }
+    out.res = ns(c.res, base.res);
+    out.carry = ['any', 'yes', 'no'].indexOf(c.carry) >= 0 ? c.carry : 'any';
+    out.borrow = ['any', 'yes', 'no'].indexOf(c.borrow) >= 0 ? c.borrow : 'any';
+    out.rem = c.rem === 'yes' ? 'yes' : 'no';
+    out.midLimit = c.midLimit !== false;
+    return out;
+  }
+  /* 只比较当前用得到的部分，判断设置是否还等于某个题型 */
+  function sameCfg(a, b) {
+    if (a.count !== b.count) return false;
+    for (var i = 0; i < a.count; i++) {
+      var x = a.nums[i], y = b.nums[i];
+      if (x.min !== y.min || x.max !== y.max || multOf(x) !== multOf(y)) return false;
+    }
+    for (var j = 0; j < a.count - 1; j++) if (a.ops[j].join() !== b.ops[j].join()) return false;
+    if (a.res.min !== b.res.min || a.res.max !== b.res.max || multOf(a.res) !== multOf(b.res)) return false;
+    if (a.count === 2) {
+      var o = a.ops[0];
+      if (o.indexOf('+') >= 0 && a.carry !== b.carry) return false;
+      if (o.indexOf('-') >= 0 && a.borrow !== b.borrow) return false;
+      if (o.indexOf('/') >= 0 && a.rem !== b.rem) return false;
+    } else if (a.midLimit !== b.midLimit) return false;
+    return true;
+  }
+  function matchPreset(cfg) {
+    for (var g = 0; g < GROUPS.length; g++)
+      for (var k = 0; k < GROUPS[g].items.length; k++)
+        if (sameCfg(cfg, GROUPS[g].items[k].cfg)) return GROUPS[g].items[k].name;
+    return null;
+  }
+
+  /* ---- 计算 ---- */
+  function hasCarry(a, b) {
+    while (a > 0 && b > 0) { if (a % 10 + b % 10 >= 10) return true; a = Math.floor(a / 10); b = Math.floor(b / 10); }
+    return false;
+  }
+  function hasBorrow(a, b) {
+    while (b > 0) { if (a % 10 < b % 10) return true; a = Math.floor(a / 10); b = Math.floor(b / 10); }
+    return false;
+  }
+  /* 按先乘除后加减计算；不合要求返回 null，否则返回 {v: 得数, r: 余数} */
+  function evaluate(nums, ops, cfg) {
+    var n = nums.length, res = cfg.res;
+    if (n === 2 && ops[0] === '/') {
+      var a = nums[0], b = nums[1];
+      if (b === 0) return null;
+      var q = Math.floor(a / b), r = a - q * b;
+      if (cfg.rem === 'yes' ? r === 0 : r !== 0) return null;
+      if (!inSpec(q, res)) return null;
+      return { v: q, r: r };
+    }
+    var mid = n > 2 && cfg.midLimit !== false;
+    var sum = 0, sign = 1, term = nums[0];
+    for (var i = 1; i < n; i++) {
+      var op = ops[i - 1], x = nums[i];
+      if (op === '*') term *= x;
+      else if (op === '/') { if (x === 0 || term % x !== 0) return null; term /= x; }
+      else {
+        sum += sign * term;
+        if (sum < 0 || (mid && sum > res.max)) return null;
+        sign = op === '+' ? 1 : -1;
+        term = x;
+      }
+    }
+    sum += sign * term;
+    if (!inSpec(sum, res)) return null;
+    if (n === 2) {
+      if (ops[0] === '+' && cfg.carry !== 'any' && hasCarry(nums[0], nums[1]) !== (cfg.carry === 'yes')) return null;
+      if (ops[0] === '-' && cfg.borrow !== 'any' && hasBorrow(nums[0], nums[1]) !== (cfg.borrow === 'yes')) return null;
+    }
+    return { v: sum, r: 0 };
+  }
+  function makeQ(nums, ops, ev, cfg) {
+    return {
+      nums: nums.slice(), ops: ops.slice(), v: ev.v, r: ev.r,
+      rs: nums.length === 2 && ops[0] === '/' && cfg.rem === 'yes',
+      blank: -1
+    };
+  }
+  function keyOf(q) {
+    var s = '' + q.nums[0];
+    for (var i = 1; i < q.nums.length; i++) s += q.ops[i - 1] + q.nums[i];
+    return s;
+  }
+
+  function validate(cfg) {
+    for (var i = 0; i < cfg.count; i++) {
+      var s = cfg.nums[i];
+      if (s.min > s.max) return '第' + (i + 1) + '个数的最小值比最大值还大，请改一下范围。';
+      if (!setOf(s).n) return '第' + (i + 1) + '个数在 ' + s.min + '～' + s.max + ' 之间找不到' + (multOf(s) === 10 ? '整十数' : '整百数') + '，请放宽范围。';
+    }
+    for (var j = 0; j < cfg.count - 1; j++)
+      if (!cfg.ops[j].length) return '第' + (j + 1) + '个运算符号还没选，请至少选一个。';
+    if (cfg.res.min > cfg.res.max) return '得数的最小值比最大值还大，请改一下范围。';
+    if (!setOf(cfg.res).n) return '得数在 ' + cfg.res.min + '～' + cfg.res.max + ' 之间找不到' + (multOf(cfg.res) === 10 ? '整十数' : '整百数') + '，请放宽范围。';
+    return null;
+  }
+  function spaceSize(cfg) {
+    var s = 1;
+    for (var i = 0; i < cfg.count; i++) s *= setOf(cfg.nums[i]).n;
+    for (var j = 0; j < cfg.count - 1; j++) s *= cfg.ops[j].length;
+    return s;
+  }
+  /* 范围不大时把所有符合条件的算式都列出来，保证题目均匀、尽量不重复 */
+  function enumerate(cfg) {
+    var n = cfg.count, sets = [], i, j;
+    for (i = 0; i < n; i++) sets.push(setOf(cfg.nums[i]));
+    var opsets = cfg.ops.slice(0, n - 1), totalOps = 1;
+    for (j = 0; j < n - 1; j++) totalOps *= opsets[j].length;
+    var idx = [], nums = [], ops = [], pool = [];
+    for (var oc = 0; oc < totalOps; oc++) {
+      var t = oc;
+      for (j = 0; j < n - 1; j++) { ops[j] = opsets[j][t % opsets[j].length]; t = Math.floor(t / opsets[j].length); }
+      for (i = 0; i < n; i++) idx[i] = 0;
+      for (;;) {
+        for (i = 0; i < n; i++) nums[i] = sets[i].lo + sets[i].step * idx[i];
+        var ev = evaluate(nums, ops, cfg);
+        if (ev) pool.push(makeQ(nums, ops, ev, cfg));
+        var k = n - 1;
+        while (k >= 0) { idx[k]++; if (idx[k] < sets[k].n) break; idx[k] = 0; k--; }
+        if (k < 0) break;
+      }
+    }
+    return pool;
+  }
+  /* 范围很大时随机抽：除法先定除数和商，加减法有一半先定得数，命中率更高 */
+  function randomQ(cfg, sets) {
+    var n = cfg.count, ops = [], nums = [], i;
+    for (i = 0; i < n - 1; i++) ops.push(cfg.ops[i][rint(cfg.ops[i].length)]);
+    if (n === 2) {
+      var op = ops[0], p = Math.random();
+      if (op === '/' && p < 0.85) {
+        var b = pick(sets[1]);
+        if (b === 0) return null;
+        var qlo = Math.max(cfg.res.min, Math.ceil(cfg.nums[0].min / b) - 1);
+        var qhi = Math.min(cfg.res.max, Math.floor(cfg.nums[0].max / b));
+        if (qhi < qlo) return null;
+        var q = qlo + rint(qhi - qlo + 1), r = 0;
+        if (cfg.rem === 'yes') { if (b < 2) return null; r = 1 + rint(b - 1); }
+        nums = [b * q + r, b];
+      } else if ((op === '+' || op === '-') && p < 0.5) {
+        var v = pick(setOf(cfg.res)), a = pick(sets[0]);
+        nums = [a, op === '+' ? v - a : a - v];
+      } else nums = [pick(sets[0]), pick(sets[1])];
+    } else {
+      for (i = 0; i < n; i++) nums.push(pick(sets[i]));
+    }
+    for (i = 0; i < n; i++) if (!inSpec(nums[i], cfg.nums[i])) return null;
+    var ev = evaluate(nums, ops, cfg);
+    return ev ? makeQ(nums, ops, ev, cfg) : null;
+  }
+
+  /* 填空题挖掉的数必须有唯一答案（例如 0×（　）=0 就不行） */
+  function blankable(q, i) {
+    var n = q.nums.length, ops = q.ops;
+    if (n === 2 && ops[0] === '/') return i === 0 || q.v >= 1;
+    var s = i, e = i;
+    while (s > 0 && (ops[s - 1] === '*' || ops[s - 1] === '/')) s--;
+    while (e < n - 1 && (ops[e] === '*' || ops[e] === '/')) e++;
+    if (s === e) return true;
+    for (var k = s; k <= e; k++) {
+      if (k === i) continue;
+      var isDivisor = k > s && ops[k - 1] === '/';
+      if (!isDivisor && q.nums[k] === 0) return false;
+    }
+    return true;
+  }
+  function chooseBlank(q, form) {
+    if (form !== 'fill' && form !== 'mix') return -1;
+    if (form === 'mix' && Math.random() < 0.5) return -1;
+    var c = [];
+    for (var i = 0; i < q.nums.length; i++) if (blankable(q, i)) c.push(i);
+    return c.length ? c[rint(c.length)] : -1;
+  }
+
+  var NOGEN = '按现在的设置一道题也出不了，可能是得数范围和数的范围对不上。请放宽得数范围，或者检查运算符号。';
+  /* 出 total 道题。返回 {list, poolSize, exhaustive} 或 {error} */
+  function generate(cfg, total, form) {
+    var err = validate(cfg);
+    if (err) return { error: err };
+    total = Math.max(1, total | 0);
+    var list = [], poolSize = -1, exhaustive = false, i;
+    if (spaceSize(cfg) <= ENUM_LIMIT) {
+      var pool = enumerate(cfg);
+      if (!pool.length) return { error: NOGEN };
+      poolSize = pool.length; exhaustive = true;
+      while (list.length < total) {
+        var batch = shuffle(pool.slice());
+        if (list.length && batch.length > 1 && keyOf(batch[0]) === keyOf(list[list.length - 1])) {
+          var t = batch[0]; batch[0] = batch[batch.length - 1]; batch[batch.length - 1] = t;
+        }
+        for (i = 0; i < batch.length && list.length < total; i++) list.push(batch[i]);
+      }
+    } else {
+      var sets = [];
+      for (i = 0; i < cfg.count; i++) sets.push(setOf(cfg.nums[i]));
+      var seen = {}, found = [], tries = 0, budget = Math.min(2000000, Math.max(80000, total * 400));
+      while (found.length < total && tries < budget) {
+        tries++;
+        if (tries === 60000 && !found.length) break;
+        var q = randomQ(cfg, sets);
+        if (!q) continue;
+        var k = keyOf(q);
+        if (seen[k]) continue;
+        seen[k] = 1; found.push(q);
+      }
+      if (!found.length) return { error: NOGEN };
+      if (found.length < total) poolSize = found.length;
+      list = found;
+      while (list.length < total) list.push(found[rint(found.length)]);
+    }
+    list = list.map(function (q) {
+      var c = { nums: q.nums.slice(), ops: q.ops.slice(), v: q.v, r: q.r, rs: q.rs, blank: -1 };
+      c.blank = chooseBlank(c, form);
+      return c;
+    });
+    return { list: list, poolSize: poolSize, exhaustive: exhaustive };
+  }
+
+  /* ---- 文字与判分 ---- */
+  function answerText(q) {
+    if (q.blank >= 0) return String(q.nums[q.blank]);
+    return q.rs ? q.v + '……' + q.r : String(q.v);
+  }
+  function toText(q, withAns) {
+    var s = '';
+    for (var i = 0; i < q.nums.length; i++) {
+      if (i) s += ' ' + SYM[q.ops[i - 1]] + ' ';
+      s += i === q.blank ? (withAns ? '（' + q.nums[i] + '）' : '（　）') : q.nums[i];
+    }
+    s += ' = ';
+    if (q.blank >= 0 || withAns) s += q.rs ? q.v + '……' + q.r : q.v;
+    else if (q.rs) s += '（　）……（　）';
+    return s.replace(/\s+$/, '');
+  }
+  function isCorrect(q, inputs) {
+    var a = (inputs[0] || '').trim(), b = (inputs[1] || '').trim();
+    if (a === '') return false;
+    if (q.blank >= 0) return +a === q.nums[q.blank];
+    if (q.rs) return +a === q.v && b !== '' && +b === q.r;
+    return +a === q.v;
+  }
+  /* 原软件按 30 题里错几题定等级；题数不是 30 时按比例换算 */
+  function grade(total, wrong) {
+    var score = total ? Math.round((total - wrong) * 100 / total) : 0;
+    var w = total ? wrong * 30 / total : 30, e = 1e-9, lv;
+    if (w <= e) lv = 9; else if (w <= 1 + e) lv = 8; else if (w <= 2 + e) lv = 7; else if (w <= 3 + e) lv = 6;
+    else if (w <= 4 + e) lv = 5; else if (w <= 5 + e) lv = 4; else if (w <= 6 + e) lv = 3;
+    else if (w <= 10 + e) lv = 2; else if (w <= 15 + e) lv = 1; else lv = 0;
+    return { score: score, level: lv, rank: RANKS[lv] };
+  }
+  function specText(s) {
+    var set = setOf(s);
+    if (!set.n) return '无';
+    var lo = set.lo, hi = set.lo + set.step * (set.n - 1);
+    var t = lo === hi ? String(lo) : lo + '～' + hi;
+    return multOf(s) === 10 ? t + ' 整十' : multOf(s) === 100 ? t + ' 整百' : t;
+  }
+  function describe(cfg) {
+    var parts = [];
+    for (var i = 0; i < cfg.count; i++) {
+      if (i) parts.push({ op: cfg.ops[i - 1].length ? cfg.ops[i - 1].map(function (o) { return SYM[o]; }).join('/') : '?' });
+      parts.push({ tok: specText(cfg.nums[i]) });
+    }
+    parts.push({ op: '=' }, { tok: specText(cfg.res) });
+    var tags = [];
+    if (cfg.count === 2) {
+      var o = cfg.ops[0];
+      if (o.indexOf('+') >= 0 && cfg.carry !== 'any') tags.push(cfg.carry === 'yes' ? '有进位' : '无进位');
+      if (o.indexOf('-') >= 0 && cfg.borrow !== 'any') tags.push(cfg.borrow === 'yes' ? '有借位' : '无借位');
+      if (o.indexOf('/') >= 0) tags.push(cfg.rem === 'yes' ? '有余数' : '无余数');
+    }
+    return { parts: parts, tags: tags };
+  }
+
+  root.KousuanEngine = {
+    SYM: SYM, RANKS: RANKS, GROUPS: GROUPS, CUSTOM: CUSTOM,
+    presetCfg: presetCfg, cloneCfg: cloneCfg, normalizeCfg: normalizeCfg, matchPreset: matchPreset,
+    hasPreset: function (n) { return !!BY_NAME[n]; },
+    isPresetCfg: function (n, cfg) { return !!BY_NAME[n] && sameCfg(cfg, BY_NAME[n].cfg); },
+    evaluate: evaluate, generate: generate, blankable: blankable, setOf: setOf, inSpec: inSpec,
+    hasCarry: hasCarry, hasBorrow: hasBorrow, keyOf: keyOf,
+    answerText: answerText, toText: toText, isCorrect: isCorrect, grade: grade, describe: describe
+  };
+})(typeof window !== 'undefined' ? window : this);
+</script>
+
+<script id="app">
+(function () {
+  'use strict';
+  var E = window.KousuanEngine;
+  var CAN_PRINT = !window.KOUSUAN_NO_PRINT;
+  var STORE = 'kousuan.settings.v1', HIST = 'kousuan.history.v1';
+  var DEFAULT_PRESET = '20以内的进位加法';
+  var DEFAULT_INFO = '姓名：__________　　时间：__________　　得分：__________';
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function loadJSON(k) { try { var s = localStorage.getItem(k); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 浏览器不让存也没关系 */ } }
+  function clampInt(v, lo, hi, d) { var n = parseInt(v, 10); if (!isFinite(n)) n = d; return Math.min(hi, Math.max(lo, n)); }
+  function digits(v) { return String(v).length; }
+
+  /* ---------------- state ---------------- */
+  function defaults() {
+    return {
+      preset: DEFAULT_PRESET,
+      cfg: E.presetCfg(DEFAULT_PRESET),
+      sheet: { perPage: 60, cols: 3, pages: 1, form: 'normal', answers: 'none', font: 'sans', title: '', info: DEFAULT_INFO },
+      practice: { mode: 'score', limit: 60, count: 30, keypad: null },
+      tab: 'sheet'
+    };
+  }
+  var state = (function () {
+    var d = defaults(), s = loadJSON(STORE);
+    if (!s || typeof s !== 'object') return d;
+    var sh = s.sheet || {}, pr = s.practice || {};
+    if (s.cfg && typeof s.cfg === 'object') {
+      // 算式设置为准；题型名称要和算式对得上，对不上就按算式重新认
+      d.cfg = E.normalizeCfg(s.cfg);
+      d.preset = E.hasPreset(s.preset) && E.isPresetCfg(s.preset, d.cfg) ? s.preset : (E.matchPreset(d.cfg) || E.CUSTOM);
+    } else {
+      d.preset = E.hasPreset(s.preset) ? s.preset : DEFAULT_PRESET;
+      d.cfg = E.presetCfg(d.preset);
+    }
+    d.sheet = {
+      perPage: clampInt(sh.perPage, 1, 200, 60), cols: clampInt(sh.cols, 1, 6, 3), pages: clampInt(sh.pages, 1, 30, 1),
+      form: ['normal', 'fill', 'mix'].indexOf(sh.form) >= 0 ? sh.form : 'normal',
+      answers: ['none', 'inline', 'key'].indexOf(sh.answers) >= 0 ? sh.answers : 'none',
+      font: ['sans', 'kai', 'song'].indexOf(sh.font) >= 0 ? sh.font : 'sans',
+      title: typeof sh.title === 'string' ? sh.title.slice(0, 40) : '',
+      info: typeof sh.info === 'string' ? sh.info.slice(0, 80) : DEFAULT_INFO
+    };
+    d.practice = {
+      mode: ['score', 'timer', 'limit'].indexOf(pr.mode) >= 0 ? pr.mode : 'score',
+      limit: clampInt(pr.limit, 5, 9999, 60), count: [10, 20, 30, 50].indexOf(pr.count) >= 0 ? pr.count : 30,
+      keypad: typeof pr.keypad === 'boolean' ? pr.keypad : null
+    };
+    d.tab = s.tab === 'practice' ? 'practice' : 'sheet';
+    return d;
+  })();
+  var saveTimer = 0;
+  function save() { clearTimeout(saveTimer); saveTimer = setTimeout(function () { saveJSON(STORE, state); }, 250); }
+
+  var sheetData = null;   // 当前试卷的题目
+  var toastTimer = 0;
+  function toast(text) {
+    var t = $('#toast'); t.textContent = text; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 2200);
+  }
+  function setSeg(el, v) { $$('button', el).forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === String(v))); }); }
+  function presetLabel() { return state.preset === E.CUSTOM ? '自定义题型' : state.preset; }
+
+  /* ---------------- 题型下拉 ---------------- */
+  function fillPresetSelect(sel) {
+    var h = '<option value="' + esc(E.CUSTOM) + '">自定义题型（自己设置算式）</option>';
+    E.GROUPS.forEach(function (g) {
+      h += '<optgroup label="' + esc(g.label) + '">';
+      g.items.forEach(function (p) { h += '<option value="' + esc(p.name) + '">' + esc(p.name) + '</option>'; });
+      h += '</optgroup>';
+    });
+    sel.innerHTML = h;
+  }
+  function applyPreset(name) {
+    state.preset = name;
+    if (name !== E.CUSTOM) state.cfg = E.presetCfg(name);
+    syncBuilder();
+    afterCfgChange();
+  }
+
+  /* ---------------- 算式设置 ---------------- */
+  var builder = $('#builder');
+  function syncBuilder() {
+    var c = state.cfg;
+    $('#preset').value = state.preset;
+    $('#p-preset').value = state.preset;
+    setSeg($('#f-count'), c.count);
+    for (var i = 0; i < 4; i++) {
+      var row = $('.fb-row[data-num="' + i + '"]'), s = c.nums[i];
+      row.hidden = i >= c.count;
+      $('#n' + i + '-min').value = s.min; $('#n' + i + '-max').value = s.max;
+      $('#n' + i + '-m10').setAttribute('aria-pressed', String(s.mult === 10));
+      $('#n' + i + '-m100').setAttribute('aria-pressed', String(s.mult === 100));
+    }
+    for (var j = 0; j < 3; j++) {
+      var orow = $('.fb-ops[data-op="' + j + '"]');
+      orow.hidden = j >= c.count - 1;
+      $$('.opchip', orow).forEach(function (b) { b.setAttribute('aria-pressed', String(c.ops[j].indexOf(b.dataset.o) >= 0)); });
+    }
+    $('#r-min').value = c.res.min; $('#r-max').value = c.res.max;
+    $('#r-m10').setAttribute('aria-pressed', String(c.res.mult === 10));
+    $('#r-m100').setAttribute('aria-pressed', String(c.res.mult === 100));
+    var two = c.count === 2, o = c.ops[0];
+    $('#f-carry-field').hidden = !(two && o.indexOf('+') >= 0);
+    $('#f-borrow-field').hidden = !(two && o.indexOf('-') >= 0);
+    $('#f-rem-field').hidden = !(two && o.indexOf('/') >= 0);
+    $('#f-mid-field').hidden = two;
+    $('#s-title').placeholder = '不填就用题型名称：' + (state.preset === E.CUSTOM ? '口算练习' : state.preset);
+    $('#f-extra-note').textContent = two ? '进位、借位、余数只用于两个数的算式。' : '三个数以上的算式按先乘除后加减计算，中间不会出现负数。';
+    setSeg($('#f-carry'), c.carry); setSeg($('#f-borrow'), c.borrow); setSeg($('#f-rem'), c.rem);
+    $('#f-mid').checked = c.midLimit !== false;
+    renderFormula();
+  }
+  function renderFormula() {
+    var d = E.describe(state.cfg), h = '';
+    d.parts.forEach(function (p) { h += p.op ? '<span class="op">' + esc(p.op) + '</span>' : '<span class="tok">' + esc(p.tok) + '</span>'; });
+    d.tags.forEach(function (t) { h += '<span class="tag">' + esc(t) + '</span>'; });
+    $('#formula').innerHTML = h;
+  }
+  function readNumInputs() {
+    var c = state.cfg;
+    for (var i = 0; i < 4; i++) {
+      c.nums[i].min = clampInt($('#n' + i + '-min').value, 0, 10000, c.nums[i].min);
+      c.nums[i].max = clampInt($('#n' + i + '-max').value, 0, 10000, c.nums[i].max);
+    }
+    c.res.min = clampInt($('#r-min').value, 0, 10000, c.res.min);
+    c.res.max = clampInt($('#r-max').value, 0, 10000, c.res.max);
+  }
+  function cfgEdited() {
+    state.preset = E.matchPreset(state.cfg) || E.CUSTOM;
+    syncBuilder();
+    afterCfgChange();
+  }
+  function afterCfgChange() {
+    regenerateSheet();
+    if (pr.status !== 'running') practiceNew();
+    save();
+  }
+
+  $('#preset').addEventListener('change', function () { applyPreset(this.value); });
+  $('#p-preset').addEventListener('change', function () { applyPreset(this.value); });
+  $('#f-count').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    state.cfg.count = +b.dataset.v; cfgEdited();
+  });
+  $$('.fb-row .num').forEach(function (inp) {
+    inp.addEventListener('change', function () { readNumInputs(); cfgEdited(); });
+  });
+  $$('.fb-row .chip').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var row = b.closest('.fb-row'), key = row.dataset.num;
+      var s = key === 'res' ? state.cfg.res : state.cfg.nums[+key], m = +b.dataset.mult;
+      readNumInputs();
+      s.mult = s.mult === m ? 1 : m;
+      cfgEdited();
+    });
+  });
+  $$('.fb-ops').forEach(function (row) {
+    row.addEventListener('click', function (e) {
+      var b = e.target.closest('.opchip'); if (!b) return;
+      var arr = state.cfg.ops[+row.dataset.op], o = b.dataset.o, k = arr.indexOf(o);
+      if (k >= 0) arr.splice(k, 1); else arr.push(o);
+      state.cfg.ops[+row.dataset.op] = ['+', '-', '*', '/'].filter(function (x) { return arr.indexOf(x) >= 0; });
+      cfgEdited();
+    });
+  });
+  [['#f-carry', 'carry'], ['#f-borrow', 'borrow'], ['#f-rem', 'rem']].forEach(function (pair) {
+    $(pair[0]).addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      state.cfg[pair[1]] = b.dataset.v; cfgEdited();
+    });
+  });
+  $('#f-mid').addEventListener('change', function () { state.cfg.midLimit = this.checked; cfgEdited(); });
+
+  /* ---------------- 试卷 ---------------- */
+  function syncSheetControls() {
+    var s = state.sheet;
+    $('#s-per').value = s.perPage; $('#s-cols').value = s.cols; $('#s-pages').value = s.pages;
+    setSeg($('#s-form'), s.form); setSeg($('#s-ans'), s.answers); setSeg($('#s-font'), s.font);
+    $('#s-title').value = s.title; $('#s-info').value = s.info;
+  }
+  function regenerateSheet() {
+    var s = state.sheet, total = s.perPage * s.pages;
+    var r = E.generate(state.cfg, total, s.form);
+    var msg = $('#sheet-msg');
+    if (r.error) {
+      sheetData = null;
+      msg.className = 'msg error'; msg.innerHTML = '<b>出不了题：</b>' + esc(r.error); msg.hidden = false;
+    } else {
+      sheetData = r;
+      if (r.poolSize > 0 && r.poolSize < total) {
+        msg.className = 'msg';
+        msg.textContent = '符合这个题型的算式一共只有 ' + r.poolSize + ' 道，所以题目会重复出现。';
+        msg.hidden = false;
+      } else msg.hidden = true;
+    }
+    renderSheets();
+  }
+  var SHEET_FONTS = {
+    sans: 'var(--font-num)',
+    kai: 'var(--font-kai)',
+    song: '"Times New Roman", "Songti SC", STSong, SimSun, "Noto Serif CJK SC", serif'
+  };
+  function sheetTitle() { return (state.sheet.title || '').trim() || (state.preset === E.CUSTOM ? '口算练习' : state.preset); }
+  function qHTML(q, w, wa, wr, show) {
+    var h = '', i;
+    for (i = 0; i < q.nums.length; i++) {
+      if (i) h += '<span class="o">' + E.SYM[q.ops[i - 1]] + '</span>';
+      if (i === q.blank) h += '<span class="b">（<i style="--w:' + w[i] + '">' + (show ? '<span class="ans">' + q.nums[i] + '</span>' : '') + '</i>）</span>';
+      else h += '<span class="n" style="--w:' + w[i] + '">' + q.nums[i] + '</span>';
+    }
+    h += '<span class="o">=</span>';
+    if (q.blank >= 0) h += '<span class="v">' + (q.rs ? q.v + '<span class="d">……</span>' + q.r : q.v) + '</span>';
+    else if (q.rs) h += '<span class="a" style="--w:' + wa + '">' + (show ? '<span class="ans">' + q.v + '</span>' : '') + '</span><span class="d">……</span><span class="a" style="--w:' + wr + '">' + (show ? '<span class="ans">' + q.r + '</span>' : '') + '</span>';
+    else h += '<span class="a" style="--w:' + wa + '">' + (show ? '<span class="ans">' + q.v + '</span>' : '') + '</span>';
+    return '<div class="q">' + h + '</div>';
+  }
+  function renderSheets() {
+    var box = $('#sheets'), s = state.sheet;
+    box.style.setProperty('--sheet-font', SHEET_FONTS[s.font] || SHEET_FONTS.sans);
+    if (!sheetData) { box.innerHTML = ''; updateSummary(); return; }
+    var list = sheetData.list, n = list[0].nums.length, i, k;
+    var w = [], wa = 1, wr = 1, anyRs = false, anyBlank = false;
+    for (i = 0; i < n; i++) w.push(1);
+    list.forEach(function (q) {
+      for (var i2 = 0; i2 < n; i2++) w[i2] = Math.max(w[i2], digits(q.nums[i2]));
+      wa = Math.max(wa, digits(q.v)); if (q.rs) { anyRs = true; wr = Math.max(wr, digits(q.r)); }
+      if (q.blank >= 0) anyBlank = true;
+    });
+    // 版面：A4，按行数平均分配高度，再按列宽和行高算字号（单位 mm）
+    var cols = s.cols, rows = Math.ceil(s.perPage / cols);
+    var gridH = 296 - 13 - 9 - 23 - 5 - 2.5, rowH = gridH / rows, capped = rowH > 22;
+    if (capped) rowH = 22;
+    var colW = (210 - 28) / cols;
+    var em = 0; for (i = 0; i < n; i++) em += w[i] * 0.58;
+    em += n * 1.45 + (anyRs ? (wa + wr) * 0.58 + 3.4 : wa * 0.58 + 1.1) + (anyBlank ? 2.4 : 0);
+    var fs = Math.max(2.8, Math.min(rowH * 0.47, (colW - 2.5) / em, 7.4));
+    var rowsCss = capped ? 'repeat(' + rows + ', calc(22 * var(--mm)))' : 'repeat(' + rows + ', minmax(0, 1fr))';
+    var title = esc(sheetTitle()), info = esc(s.info || '');
+    var pages = s.pages, html = '';
+    function sheet(p, show, isKey) {
+      var part = list.slice(p * s.perPage, (p + 1) * s.perPage), qs = '';
+      for (k = 0; k < part.length; k++) qs += qHTML(part[k], w, wa, wr, show);
+      var foot = isKey ? '答案 · 第 ' + (p + 1) + ' 页' : (pages > 1 ? '第 ' + (p + 1) + ' 页 / 共 ' + pages + ' 页' : '');
+      return '<article class="sheet" style="--fs:' + fs.toFixed(2) + ';--cols:' + cols + '">' +
+        '<header class="sh-head"><h2 class="sh-title">' + title + (isKey ? ' <span class="key">答案</span>' : '') + '</h2>' +
+        (isKey ? '' : (info ? '<p class="sh-info">' + info + '</p>' : '')) + '</header>' +
+        '<div class="sh-grid" style="grid-template-rows:' + rowsCss + '">' + qs + '</div>' +
+        '<footer class="sh-foot">' + foot + '</footer></article>';
+    }
+    for (var p = 0; p < pages; p++) html += sheet(p, s.answers === 'inline', false);
+    if (s.answers === 'key') for (var p2 = 0; p2 < pages; p2++) html += sheet(p2, true, true);
+    box.innerHTML = html;
+    fitSheets();
+    updateSummary();
+  }
+  function updateSummary() {
+    var s = state.sheet, total = s.perPage * s.pages;
+    var pagesOut = s.pages * (s.answers === 'key' ? 2 : 1);
+    $('#summary').innerHTML = sheetData
+      ? '共 <b>' + total + '</b> 题 · 打印 <b>' + pagesOut + '</b> 页' + (s.answers === 'key' ? '（含答案 ' + s.pages + ' 页）' : '')
+      : '还没有题目';
+    $('#btn-print').disabled = !sheetData;
+    $('#btn-copy').disabled = !sheetData;
+  }
+  function fitSheets() {
+    var box = $('#sheets');
+    var w = box.clientWidth;
+    if (!w) return;
+    var mm = Math.min(w, 800) / 210;
+    box.style.setProperty('--mm', mm.toFixed(4) + 'px');
+  }
+  if (window.ResizeObserver) new ResizeObserver(fitSheets).observe($('#sheets'));
+  else window.addEventListener('resize', fitSheets);
+
+  function bindNum(id, key, lo, hi, regen) {
+    $(id).addEventListener('change', function () {
+      state.sheet[key] = clampInt(this.value, lo, hi, state.sheet[key]);
+      this.value = state.sheet[key];
+      if (regen) regenerateSheet(); else renderSheets();
+      save();
+    });
+  }
+  bindNum('#s-per', 'perPage', 1, 200, true);
+  bindNum('#s-cols', 'cols', 1, 6, false);
+  bindNum('#s-pages', 'pages', 1, 30, true);
+  $('#s-form').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    state.sheet.form = b.dataset.v; setSeg(this, b.dataset.v);
+    regenerateSheet(); if (pr.status !== 'running') practiceNew(); save();
+  });
+  $('#s-ans').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    state.sheet.answers = b.dataset.v; setSeg(this, b.dataset.v); renderSheets(); save();
+  });
+  $('#s-font').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    state.sheet.font = b.dataset.v; setSeg(this, b.dataset.v); renderSheets(); save();
+  });
+  $('#s-title').addEventListener('input', function () { state.sheet.title = this.value; renderSheets(); save(); });
+  $('#s-info').addEventListener('input', function () { state.sheet.info = this.value; renderSheets(); save(); });
+  $('#btn-regen').addEventListener('click', function () { regenerateSheet(); toast('换好了一批新题'); });
+
+  function sheetText() {
+    if (!sheetData) return '';
+    var s = state.sheet, list = sheetData.list, out = [];
+    function block(p, withAns, isKey) {
+      out.push(sheetTitle() + (isKey ? '（答案）' : ''));
+      if (!isKey && s.info) out.push(s.info);
+      out.push('');
+      var part = list.slice(p * s.perPage, (p + 1) * s.perPage);
+      for (var r = 0; r < part.length; r += s.cols)
+        out.push(part.slice(r, r + s.cols).map(function (q) { return E.toText(q, withAns); }).join('\t'));
+      out.push('');
+    }
+    for (var p = 0; p < s.pages; p++) block(p, s.answers === 'inline', false);
+    if (s.answers === 'key') for (var p2 = 0; p2 < s.pages; p2++) block(p2, true, true);
+    return out.join('\n');
+  }
+  function showCopyBox(text) {
+    var ta = $('#copy-text'); ta.value = text; openOverlay('#copybox');
+    setTimeout(function () { ta.focus(); ta.select(); }, 30);
+  }
+  $('#btn-copy').addEventListener('click', function () {
+    var text = sheetText();
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast('已复制，可以粘贴到 Word 或 WPS'); }, function () { showCopyBox(text); });
+    } else showCopyBox(text);
+  });
+
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  if (!CAN_PRINT) {
+    $('#btn-print').hidden = true;
+    $('#print-note').textContent = '这是在线预览版，不能直接打印。部署到自己的网站后就可以打印；现在可以先点「复制题目」，粘贴到 Word 或 WPS 里打印。';
+  } else if (isWeChat) {
+    $('#print-note').textContent = '微信里不能打印：请点右上角「…」，选「在浏览器打开」。';
+  } else {
+    $('#print-note').textContent = '打印时纸张选 A4；想存成 PDF，在打印窗口里选「存储为 PDF」。';
+  }
+  $('#btn-print').addEventListener('click', function () {
+    if (!sheetData) return;
+    fitSheets();
+    window.print();
+  });
+
+  /* ---------------- 口算训练 ---------------- */
+  var pr = { list: [], status: 'idle', t0: 0, elapsed: 0, tick: 0, error: '', last: null };
+  var grid = $('#p-grid'), stage = $('#p-stage');
+  var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  function keypadOn() { return state.practice.keypad === null ? coarse : state.practice.keypad; }
+
+  function syncPracticeControls() {
+    var p = state.practice;
+    setSeg($('#p-mode'), p.mode); setSeg($('#p-count'), p.count);
+    $('#p-limit').value = p.limit;
+    $('#p-limit-field').hidden = p.mode !== 'limit';
+    $('#p-keys').setAttribute('aria-pressed', String(keypadOn()));
+    updatePracticeUI();
+  }
+  function fmtTime(ms) {
+    var t = Math.max(0, Math.round(ms / 1000)), m = Math.floor(t / 60), s = t % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function fmtDur(ms) {
+    var t = Math.max(0, Math.round(ms / 1000)), m = Math.floor(t / 60), s = t % 60;
+    return m ? m + '分' + s + '秒' : s + '秒';
+  }
+  function cardHTML(q, idx, wa, wr) {
+    var h = '', i;
+    function inp(f, wd, label) {
+      return '<input class="pin" id="pa-' + idx + '-' + f + '" data-q="' + idx + '" data-f="' + f + '" type="text" inputmode="' + (keypadOn() ? 'none' : 'numeric') +
+        '" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="next" maxlength="6" style="--w:' + wd + '" aria-label="第' + (idx + 1) + '题' + label + '" disabled>';
+    }
+    for (i = 0; i < q.nums.length; i++) {
+      if (i) h += '<span class="o">' + E.SYM[q.ops[i - 1]] + '</span>';
+      if (i === q.blank) h += '<span class="paren">（</span>' + inp(0, Math.max(2, digits(q.nums[i])), '括号里的数') + '<span class="paren">）</span>';
+      else h += '<span>' + q.nums[i] + '</span>';
+    }
+    h += '<span class="o">=</span>';
+    if (q.blank >= 0) h += '<span>' + (q.rs ? q.v + '<span class="d">……</span>' + q.r : q.v) + '</span>';
+    else if (q.rs) h += inp(0, wa, '商') + '<span class="d">……</span>' + inp(1, wr, '余数');
+    else h += inp(0, wa, '答案');
+    return '<div class="pcard' + (q.blank >= 0 ? ' blank' : '') + '" data-idx="' + idx + '"><span class="idx">' + (idx + 1) + '</span><span class="expr">' + h + '</span></div>';
+  }
+  /* 卡片最窄要放得下最长的一道题（按字号 29px 估算） */
+  function cardMin(list, wa, wr) {
+    var em = 0;
+    list.forEach(function (q) {
+      var e = 0, i;
+      for (i = 0; i < q.nums.length; i++) e += digits(q.nums[i]) * 0.6;
+      e += q.nums.length * 1.25;
+      if (q.blank >= 0) e += 2 + 1 + digits(q.v) * 0.6 + (q.rs ? 2 + digits(q.r) * 0.6 : 0);
+      else e += q.rs ? (wa + wr) * 0.6 + 2 + 2.4 : wa * 0.6 + 1.2;
+      em = Math.max(em, e);
+    });
+    return Math.ceil(em * 29 + 64);
+  }
+  function practiceNew() {
+    if (pr.status === 'running') return;
+    var r = E.generate(state.cfg, state.practice.count, state.sheet.form);
+    $('#p-result').hidden = true;
+    if (r.error) { pr.list = []; pr.status = 'error'; pr.error = r.error; }
+    else { pr.list = r.list; pr.status = 'ready'; pr.error = ''; }
+    pr.elapsed = 0;
+    renderPractice();
+  }
+  function renderPractice() {
+    if (pr.status === 'error') {
+      grid.innerHTML = '<div class="msg error pmsg"><b>出不了题：</b>' + esc(pr.error) + ' 请到「出题打印」里修改算式。</div>';
+    } else {
+      var wa = 2, wr = 1;
+      pr.list.forEach(function (q) { wa = Math.max(wa, digits(q.v)); if (q.rs) wr = Math.max(wr, digits(q.r)); });
+      grid.style.setProperty('--card-min', cardMin(pr.list, wa, wr) + 'px');
+      grid.innerHTML = pr.list.map(function (q, i) { return cardHTML(q, i, wa, wr); }).join('');
+    }
+    updatePracticeUI();
+  }
+  function inputs() { return $$('.pin', grid); }
+  function updatePracticeUI() {
+    var st = pr.status, mode = state.practice.mode;
+    stage.classList.toggle('cover', st === 'ready');
+    $('#p-start').disabled = st !== 'ready';
+    $('#p-finish').disabled = st !== 'running';
+    $('#p-new').disabled = st === 'running';
+    $('#p-preset').disabled = st === 'running';
+    $$('#p-mode button, #p-count button').forEach(function (b) { b.disabled = st === 'running'; });
+    $('#p-limit').disabled = st === 'running';
+    $('#keypad').hidden = !(st === 'running' && keypadOn());
+    var clock = $('#p-clock'), bar = $('#p-limitbar');
+    clock.hidden = mode === 'score';
+    bar.hidden = mode !== 'limit';
+    var limitMs = state.practice.limit * 1000;
+    var shown = st === 'running' ? performance.now() - pr.t0 : pr.elapsed;
+    if (mode === 'limit') {
+      var left = Math.max(0, limitMs - shown);
+      clock.textContent = fmtTime(st === 'done' ? left : (st === 'running' ? left : limitMs));
+      var warn = st === 'running' && left <= 10000;
+      clock.classList.toggle('warn', warn); bar.classList.toggle('warn', warn);
+      $('span', bar).style.transform = 'scaleX(' + (st === 'running' || st === 'done' ? left / limitMs : 1).toFixed(4) + ')';
+    } else {
+      clock.classList.remove('warn');
+      clock.textContent = fmtTime(st === 'running' || st === 'done' ? shown : 0);
+    }
+    var answered = 0;
+    if (pr.list.length) {
+      var byQ = {};
+      inputs().forEach(function (inp) { var k = inp.dataset.q; if (!(k in byQ)) byQ[k] = true; if (!inp.value) byQ[k] = false; });
+      for (var k in byQ) if (byQ[k]) answered++;
+    }
+    $('#p-progress').textContent = pr.list.length ? '已答 ' + answered + ' / ' + pr.list.length : '';
+  }
+  var lastPin = null;
+  function setActive(inp) {
+    $$('.pcard.active', grid).forEach(function (c) { c.classList.remove('active'); });
+    if (inp) { inp.closest('.pcard').classList.add('active'); lastPin = inp; }
+  }
+  function focusInput(inp) {
+    if (!inp) return;
+    inp.focus({ preventScroll: true });
+    setActive(inp);
+    var card = inp.closest('.pcard'), r = card.getBoundingClientRect();
+    var bottomSpace = keypadOn() ? 290 : 40;
+    if (r.top < 70 || r.bottom > window.innerHeight - bottomSpace) card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  function practiceStart() {
+    if (pr.status !== 'ready') return;
+    pr.status = 'running'; pr.t0 = performance.now();
+    inputs().forEach(function (i) { i.disabled = false; i.readOnly = false; });
+    $('#p-result').hidden = true;
+    clearInterval(pr.tick);
+    pr.tick = setInterval(function () {
+      if (pr.status !== 'running') return;
+      if (state.practice.mode === 'limit' && performance.now() - pr.t0 >= state.practice.limit * 1000) { practiceFinish(true); return; }
+      updatePracticeUI();
+    }, 200);
+    updatePracticeUI();
+    focusInput(inputs()[0]);
+  }
+  var CHECK = '<svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4.5 17.5c2.7 2 5.2 4.6 7.4 7.6C15.6 17.4 21 10.4 28 4.8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CROSS = '<svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 7.5c6.3 5.3 12 11.2 17.8 17.6M25 6.5C18.6 12 12.8 18.3 6.8 25.4" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>';
+  function practiceFinish(timeUp) {
+    if (pr.status !== 'running') return;
+    clearInterval(pr.tick);
+    var mode = state.practice.mode, limitMs = state.practice.limit * 1000;
+    pr.elapsed = performance.now() - pr.t0;
+    if (mode === 'limit') pr.elapsed = Math.min(pr.elapsed, limitMs);
+    pr.status = 'done';
+    var wrong = 0, wrongList = [];
+    $$('.pcard', grid).forEach(function (card) {
+      var idx = +card.dataset.idx, q = pr.list[idx];
+      var vals = $$('.pin', card).map(function (i) { i.readOnly = true; i.disabled = true; return i.value; });
+      var ok = E.isCorrect(q, vals);
+      card.classList.remove('active');
+      card.classList.add(ok ? 'right' : 'wrong');
+      card.insertAdjacentHTML('beforeend', ok ? CHECK : CROSS);
+      if (!ok) {
+        wrong++; wrongList.push(q);
+        card.insertAdjacentHTML('beforeend', '<span class="fix">' + (vals.join('') === '' ? '没有答 · ' : '') + '正确答案：' + esc(E.answerText(q)) + '</span>');
+      }
+    });
+    var g = E.grade(pr.list.length, wrong);
+    pr.last = { wrongList: wrongList };
+    var rec = {
+      t: Date.now(), name: presetLabel(), n: pr.list.length, wrong: wrong, score: g.score, rank: g.rank, mode: mode,
+      ms: mode === 'score' ? null : Math.round(pr.elapsed), timeUp: !!timeUp
+    };
+    var hist = loadHist(); hist.unshift(rec); saveJSON(HIST, hist.slice(0, 30));
+    showResult(g, rec);
+    renderHistory();
+    updatePracticeUI();
+  }
+  function showResult(g, rec) {
+    var box = $('#p-result'), top = g.level >= 7;
+    var stats = '<div><dt>正确</dt><dd>' + (rec.n - rec.wrong) + '</dd></div><div><dt>错误</dt><dd>' + rec.wrong + '</dd></div>';
+    if (rec.ms !== null) stats += '<div><dt>' + (rec.mode === 'limit' ? '用时（限 ' + state.practice.limit + ' 秒）' : '用时') + '</dt><dd>' + fmtDur(rec.ms) + '</dd></div>';
+    var ladder = E.RANKS.map(function (r, i) { return '<li class="' + (i >= 7 ? 'top' : '') + (i === g.level ? ' on' : '') + '">' + r + '</li>'; }).join('');
+    box.innerHTML =
+      (rec.timeUp ? '<div class="msg">时间到，已自动交卷。</div>' : '') +
+      '<div class="result-main">' +
+        '<div class="score" aria-label="得分 ' + g.score + ' 分"><b>' + g.score + '</b><span>分</span></div>' +
+        '<div class="seal' + (top ? ' top' : '') + '" aria-label="等级 ' + g.rank + '">' + g.rank + '</div>' +
+        '<dl class="stats">' + stats + '</dl>' +
+      '</div>' +
+      '<ol class="ladder" aria-label="等级从低到高">' + ladder + '</ol>' +
+      '<div class="result-actions">' +
+        '<button class="btn primary" type="button" data-act="again">再练一组 <kbd>C</kbd></button>' +
+        (rec.wrong ? '<button class="btn" type="button" data-act="retry">只练错题（' + rec.wrong + ' 道）</button>' : '') +
+      '</div>';
+    box.hidden = false;
+    box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  $('#p-result').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]'); if (!b) return;
+    if (b.dataset.act === 'again') { practiceNew(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    if (b.dataset.act === 'retry' && pr.last && pr.last.wrongList.length) {
+      pr.list = pr.last.wrongList.map(function (q) { return JSON.parse(JSON.stringify(q)); });
+      for (var i = pr.list.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = pr.list[i]; pr.list[i] = pr.list[j]; pr.list[j] = t; }
+      pr.status = 'ready'; pr.elapsed = 0; $('#p-result').hidden = true;
+      renderPractice();
+    }
+  });
+  function nextInput(from) {
+    var all = inputs(), k = all.indexOf(from);
+    for (var j = k + 1; j < all.length; j++) if (!all[j].value) return all[j];
+    for (var j2 = 0; j2 < k; j2++) if (!all[j2].value) return all[j2];
+    return all[k + 1] || null;
+  }
+  grid.addEventListener('input', function (e) {
+    var t = e.target; if (!t.classList.contains('pin')) return;
+    var clean = t.value.replace(/\D/g, '').slice(0, 6);
+    if (clean !== t.value) t.value = clean;
+    updatePracticeUI();
+  });
+  grid.addEventListener('focusin', function (e) { if (e.target.classList.contains('pin')) setActive(e.target); });
+  grid.addEventListener('keydown', function (e) {
+    var t = e.target; if (!t.classList.contains('pin') || pr.status !== 'running') return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      var nx = nextInput(t);
+      if (nx) focusInput(nx); else toast('都答完了，检查一下就按 F 交卷');
+    }
+  });
+  grid.addEventListener('click', function (e) {
+    var card = e.target.closest('.pcard');
+    if (!card || pr.status !== 'running' || e.target.classList.contains('pin')) return;
+    var first = $('.pin', card); if (first) focusInput(first);
+  });
+  $('#keypad').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || pr.status !== 'running') return;
+    var ae = document.activeElement;
+    var act = ae && ae.classList && ae.classList.contains('pin') ? ae : (lastPin && grid.contains(lastPin) ? lastPin : null);
+    if (!act) act = inputs()[0];
+    if (!act) return;
+    var k = b.dataset.k;
+    if (k === 'next') {
+      var nx = nextInput(act);
+      if (nx) focusInput(nx); else { focusInput(act); toast('都答完了，检查一下就点交卷'); }
+      return;
+    }
+    if (k === 'back') act.value = act.value.slice(0, -1);
+    else if (act.value.length < 6) act.value += k;
+    focusInput(act);
+    updatePracticeUI();
+  });
+  $('#keypad').addEventListener('mousedown', function (e) { e.preventDefault(); });
+
+  $('#p-new').addEventListener('click', practiceNew);
+  $('#p-start').addEventListener('click', practiceStart);
+  $('#p-cover-start').addEventListener('click', practiceStart);
+  $('#p-finish').addEventListener('click', function () { practiceFinish(false); });
+  $('#p-mode').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || pr.status === 'running') return;
+    state.practice.mode = b.dataset.v; save(); syncPracticeControls();
+  });
+  $('#p-count').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || pr.status === 'running') return;
+    state.practice.count = +b.dataset.v; save(); syncPracticeControls(); practiceNew();
+  });
+  $('#p-limit').addEventListener('change', function () {
+    state.practice.limit = clampInt(this.value, 5, 9999, state.practice.limit); this.value = state.practice.limit; save(); updatePracticeUI();
+  });
+  $('#p-keys').addEventListener('click', function () {
+    state.practice.keypad = !keypadOn(); save();
+    inputs().forEach(function (i) { i.setAttribute('inputmode', keypadOn() ? 'none' : 'numeric'); });
+    syncPracticeControls();
+  });
+
+  function loadHist() { var h = loadJSON(HIST); return Array.isArray(h) ? h : []; }
+  var clearArmed = false;
+  function renderHistory() {
+    var h = loadHist(), box = $('#p-history');
+    if (!h.length) {
+      box.innerHTML = '<h2>最近练习</h2><p class="hint">还没有练习记录。做完一组题、交卷以后，成绩会记在这里（只保存在这台设备上）。</p>';
+      return;
+    }
+    var modeName = { score: '计分', timer: '计时', limit: '限时' };
+    var rows = h.slice(0, 12).map(function (r) {
+      var d = new Date(r.t), pad = function (x) { return (x < 10 ? '0' : '') + x; };
+      return '<tr><td>' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + '</td>' +
+        '<td>' + esc(r.name) + '</td><td>' + (modeName[r.mode] || '') + '</td><td>' + r.n + ' 题</td>' +
+        '<td class="sc">' + r.score + ' 分</td><td>' + esc(r.rank) + '</td><td>' + (r.ms == null ? '—' : fmtDur(r.ms)) + '</td></tr>';
+    }).join('');
+    box.innerHTML = '<div class="row" style="justify-content:space-between;align-items:center"><h2>最近练习</h2>' +
+      '<button class="btn quiet" type="button" id="p-hist-clear">' + (clearArmed ? '再点一次确认清空' : '清空记录') + '</button></div>' +
+      '<div class="htable-wrap"><table class="htable"><thead><tr><th>时间</th><th>题型</th><th>模式</th><th>题数</th><th>得分</th><th>等级</th><th>用时</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+  $('#p-history').addEventListener('click', function (e) {
+    if (!e.target.closest('#p-hist-clear')) return;
+    if (!clearArmed) { clearArmed = true; renderHistory(); setTimeout(function () { if (clearArmed) { clearArmed = false; renderHistory(); } }, 4000); return; }
+    clearArmed = false; saveJSON(HIST, []); renderHistory(); toast('练习记录已清空');
+  });
+
+  /* ---------------- 标签页、快捷键、弹窗 ---------------- */
+  function setTab(tab, fromHash) {
+    state.tab = tab;
+    var isP = tab === 'practice';
+    $('#tab-sheet').setAttribute('aria-selected', String(!isP));
+    $('#tab-practice').setAttribute('aria-selected', String(isP));
+    $('#view-sheet').hidden = isP;
+    $('#view-practice').hidden = !isP;
+    if (!isP) fitSheets();
+    if (!fromHash) { try { history.replaceState(null, '', isP ? '#practice' : '#sheet'); } catch (e) { /* 不支持就算了 */ } }
+    save();
+  }
+  $('#tab-sheet').addEventListener('click', function () { setTab('sheet'); });
+  $('#tab-practice').addEventListener('click', function () { setTab('practice'); });
+  window.addEventListener('hashchange', function () {
+    if (location.hash === '#practice') setTab('practice', true);
+    else if (location.hash === '#sheet') setTab('sheet', true);
+  });
+
+  var openId = null;
+  function openOverlay(id) { $(id).hidden = false; openId = id; var c = $(id + ' [data-close]'); if (c) c.focus(); }
+  function closeOverlay() { if (!openId) return; $(openId).hidden = true; openId = null; }
+  $('#btn-help').addEventListener('click', function () { openOverlay('#help'); });
+  $$('.overlay').forEach(function (o) {
+    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('[data-close]')) closeOverlay(); });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && openId) { closeOverlay(); return; }
+    if (openId || state.tab !== 'practice' || e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
+    var t = e.target, isPin = t.classList && t.classList.contains('pin');
+    var inField = !isPin && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName || '');
+    if (inField) return;
+    var k = (e.key || '').toLowerCase();
+    if (k === 's' && pr.status === 'ready') { e.preventDefault(); practiceStart(); }
+    else if (k === 'f' && pr.status === 'running') { e.preventDefault(); practiceFinish(false); }
+    else if (k === 'c' && pr.status !== 'running') { e.preventDefault(); practiceNew(); }
+    else if (isPin && e.key.length === 1 && !/[0-9]/.test(e.key)) e.preventDefault();
+  });
+
+  /* ---------------- 启动 ---------------- */
+  fillPresetSelect($('#preset'));
+  fillPresetSelect($('#p-preset'));
+  syncBuilder();
+  syncSheetControls();
+  syncPracticeControls();
+  regenerateSheet();
+  practiceNew();
+  renderHistory();
+  var startTab = location.hash === '#practice' ? 'practice' : location.hash === '#sheet' ? 'sheet' : state.tab;
+  setTab(startTab, true);
+  window.addEventListener('beforeprint', fitSheets);
+})();
+</script>
+</body>
+</html>
